@@ -2,21 +2,22 @@ import ReactDOMServer from "react-dom/server";
 import InvoiceHTMLCustomer from "./InvoiceHTML-Customer";
 import InvoiceHTMLPlatform from "./InvoiceHTML-Platform";
 
-type InvoiceType = {
+// ✅ Type definition for invoice
+interface InvoiceData {
   invoiceNumber: string;
-  items: any[];
+  invoiceDate: string;
   buyer: any;
-  seller: any;
-  subTotal: number;
-  totalTax: number;
-  totalAmount: number;
+  seller?: any;
+  items?: any[];
   deliveryCharge?: number;
+  paymentMode?: string;
   platformFee?: number;
-  [key: string]: any;
-};
+  total?: number;
+  orderId?: string;
+}
 
 export const generateInvoiceHTML = (
-  invoice: InvoiceType,
+  invoice: InvoiceData,
   type: "customer" | "platform"
 ): string => {
   const component =

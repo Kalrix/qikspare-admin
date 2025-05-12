@@ -1,0 +1,133 @@
+.login-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .left-panel,
+  .right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 🔵 Login panel (now blue) */
+  .left-panel {
+    background: linear-gradient(to bottom right, #1e3a8a, #3b82f6);
+    color: white;
+  }
+  
+  /* ⚪ Logo + welcome panel (now white) */
+  .right-panel {
+    background: #ffffff;
+    color: #1e3a8a;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  /* 🔐 Login card */
+  .login-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 380px;
+  }
+  
+  .login-card h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.6rem;
+    color: #fff;
+  }
+  
+  .login-card p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .login-card label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  .login-card input {
+    width: 100%;
+    padding: 0.65rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-bottom: 1.25rem;
+  }
+  
+  .login-card input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .login-card button {
+    width: 100%;
+    padding: 0.7rem;
+    background: white;
+    color: #1e3a8a;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+  
+  .login-card button:hover {
+    background: #ffffffcc;
+    color: #1e3a8a;
+  }
+  
+  /* ❌ Error Message */
+  .login-card .error {
+    color: #ffb3b3;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  /* ✅ Branding Panel */
+  .branding-content {
+    max-width: 420px;
+    margin: auto;
+  }
+  
+  .glass-card {
+    background: #fff;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  }
+  
+  .branding-logo {
+    width: 70px;
+    margin: 0 auto 1rem;
+  }
+  
+  .branding-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+  }
+  
+  .tagline {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    color: #1e3a8a;
+  }
+  
+  .quote {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #3b3b3b;
+  }
+  

@@ -6,23 +6,23 @@ const InvoiceHTMLCustomer = ({ invoice }: { invoice: any }) => {
   const {
     invoiceDate,
     invoiceNumber = "INV123456",
-    buyer,
-    seller,
+    buyer = {},
+    seller = {},
     items = [],
     deliveryCharge = 0,
-    paymentMode,
+    paymentMode = "-",
     platformFee = 0,
-    total: passedTotal
+    total: passedTotal,
   } = invoice;
 
   const subtotal = items.reduce((sum: number, item: any) => {
-    const base = item.unitPrice * item.quantity;
-    return sum + (base - item.discountAmount);
+    const base = (item.unitPrice || 0) * (item.quantity || 0);
+    return sum + (base - (item.discountAmount || 0));
   }, 0);
 
   const totalGst = items.reduce((sum: number, item: any) => {
-    const base = item.unitPrice * item.quantity - item.discountAmount;
-    return sum + (base * item.gst) / 100;
+    const base = (item.unitPrice || 0) * (item.quantity || 0) - (item.discountAmount || 0);
+    return sum + ((base * (item.gst || 0)) / 100);
   }, 0);
 
   const grandTotal = passedTotal || subtotal + totalGst + deliveryCharge;
@@ -41,18 +41,18 @@ const InvoiceHTMLCustomer = ({ invoice }: { invoice: any }) => {
       <div className="invoice-parties">
         <div>
           <h4>Buyer (Garage)</h4>
-          <p><strong>Name:</strong> {buyer?.name || buyer?.label || "-"}</p>
-          <p><strong>Phone:</strong> {buyer?.phone || "-"}</p>
-          <p><strong>Email:</strong> {buyer?.email || "-"}</p>
-          <p><strong>Address:</strong> {buyer?.address || "-"}</p>
+          <p><strong>Name:</strong> {buyer.name || buyer.label || "-"}</p>
+          <p><strong>Phone:</strong> {buyer.phone || "-"}</p>
+          <p><strong>Email:</strong> {buyer.email || "-"}</p>
+          <p><strong>Address:</strong> {buyer.address || "-"}</p>
         </div>
         <div>
           <h4>Seller (Vendor)</h4>
-          <p><strong>Name:</strong> {seller?.name || seller?.label || "-"}</p>
-          <p><strong>Phone:</strong> {seller?.phone || "-"}</p>
-          <p><strong>Email:</strong> {seller?.email || "-"}</p>
-          <p><strong>Address:</strong> {seller?.address || "-"}</p>
-          <p><strong>GSTIN:</strong> {seller?.gstin || "-"}</p>
+          <p><strong>Name:</strong> {seller.name || seller.label || "-"}</p>
+          <p><strong>Phone:</strong> {seller.phone || "-"}</p>
+          <p><strong>Email:</strong> {seller.email || "-"}</p>
+          <p><strong>Address:</strong> {seller.address || "-"}</p>
+          <p><strong>GSTIN:</strong> {seller.gstin || "-"}</p>
         </div>
       </div>
 
@@ -72,22 +72,22 @@ const InvoiceHTMLCustomer = ({ invoice }: { invoice: any }) => {
         </thead>
         <tbody>
           {items.map((item: any, idx: number) => {
-            const base = item.unitPrice * item.quantity;
-            const discounted = base - item.discountAmount;
-            const gstAmt = (discounted * item.gst) / 100;
+            const base = (item.unitPrice || 0) * (item.quantity || 0);
+            const discounted = base - (item.discountAmount || 0);
+            const gstAmt = (discounted * (item.gst || 0)) / 100;
             const rowTotal = discounted + gstAmt;
 
             return (
               <tr key={idx}>
-                <td>{item.partName}</td>
-                <td>{item.modelNo}</td>
-                <td>{item.category}</td>
+                <td>{item.partName || "-"}</td>
+                <td>{item.modelNo || "-"}</td>
+                <td>{item.category || "-"}</td>
                 <td>{item.quantity}</td>
-                <td>{item.unitPrice?.toFixed(2)}</td>
-                <td>{item.discountAmount?.toFixed(2)}</td>
-                <td>{item.gst}%</td>
-                <td>{gstAmt?.toFixed(2)}</td>
-                <td>{rowTotal?.toFixed(2)}</td>
+                <td>{(item.unitPrice || 0).toFixed(2)}</td>
+                <td>{(item.discountAmount || 0).toFixed(2)}</td>
+                <td>{item.gst || 0}%</td>
+                <td>{gstAmt.toFixed(2)}</td>
+                <td>{rowTotal.toFixed(2)}</td>
               </tr>
             );
           })}

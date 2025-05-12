@@ -3,16 +3,15 @@ import "./invoice.css";
 import logo from "../../../qikspare-logo.png";
 
 const InvoiceHTMLPlatform = ({ invoice }: { invoice: any }) => {
-    const {
-        invoiceNumber = "REV123456",
-        invoiceDate,
-        buyer, // <- corrected
-        platformFee,
-        deliveryCharge = 0,
-        orderId,
-        paymentMode = "UPI"
-      } = invoice;
-      
+  const {
+    invoiceNumber = "REV123456",
+    invoiceDate,
+    buyer = {},
+    platformFee = 0,
+    deliveryCharge = 0,
+    orderId,
+    paymentMode = "UPI"
+  } = invoice;
 
   const gstRate = 18;
   const calcGST = (amount: number) => (amount * gstRate) / 100;
@@ -48,13 +47,12 @@ const InvoiceHTMLPlatform = ({ invoice }: { invoice: any }) => {
 
       <div className="invoice-parties">
         <div>
-        <p><strong>Billed To (Buyer)</strong></p>
-<p><strong>Name:</strong> {buyer?.name}</p>
-<p><strong>Phone:</strong> {buyer?.phone}</p>
-<p><strong>Email:</strong> {buyer?.email}</p>
-<p><strong>Address:</strong> {buyer?.address}</p>
-<p><strong>GSTIN:</strong> {buyer?.gstin || "-"}</p>
-
+          <p><strong>Billed To (Buyer)</strong></p>
+          <p><strong>Name:</strong> {buyer.name || "-"}</p>
+          <p><strong>Phone:</strong> {buyer.phone || "-"}</p>
+          <p><strong>Email:</strong> {buyer.email || "-"}</p>
+          <p><strong>Address:</strong> {buyer.address || "-"}</p>
+          <p><strong>GSTIN:</strong> {buyer.gstin || "-"}</p>
         </div>
       </div>
 

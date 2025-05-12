@@ -10,15 +10,16 @@ import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { Dayjs } from "dayjs"; // ✅ Fix: Add Dayjs type
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 const InvoicesPage = () => {
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
 
   const navigate = useNavigate();
@@ -64,9 +65,13 @@ const InvoicesPage = () => {
     setFilteredData(filtered);
   };
 
-  const handleDateFilter = (dates: any[]) => {
-    setDateRange(dates);
-    if (!dates || dates.length !== 2) {
+  const handleDateFilter = (
+    dates: [Dayjs | null, Dayjs | null] | null,
+    _dateStrings: [string, string]
+  ) => {
+    setDateRange(dates ?? [null, null]);
+
+    if (!dates || dates.length !== 2 || !dates[0] || !dates[1]) {
       setFilteredData(invoices);
       return;
     }
@@ -139,7 +144,10 @@ const InvoicesPage = () => {
                 />
               </Col>
               <Col>
-                <RangePicker value={dateRange} onChange={handleDateFilter} />
+                <RangePicker
+                  value={dateRange}
+                  onChange={handleDateFilter}
+                />
               </Col>
             </Row>
 

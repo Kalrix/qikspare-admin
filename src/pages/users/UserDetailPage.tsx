@@ -22,10 +22,25 @@ import Sidebar from "../dashboard/components/Sidebar";
 
 const { Content, Sider } = Layout;
 
+interface User {
+  _id: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  referral_code?: string;
+  referred_by?: string;
+  referral_count?: number;
+  kyc_status?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
 const UserDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [form] = Form.useForm();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,7 +56,7 @@ const UserDetailPage: React.FC = () => {
 
       const data = await res.json();
       if (res.ok) {
-        const found = data.users.find((u: any) => u._id === id);
+        const found = data.users.find((u: User) => u._id === id);
         if (!found) throw new Error("User not found");
         setUser(found);
         form.setFieldsValue(found);
@@ -158,7 +173,7 @@ const UserDetailPage: React.FC = () => {
                         ["pan_number", "PAN Number"],
                         ["role", "Role", true],
                       ].map(([key, label, disabled]) => (
-                        <Col span={12} key={key}>
+                        <Col span={12} key={String(key)}>
                           <Form.Item name={key as string} label={label as string}>
                             <Input disabled={!!disabled} />
                           </Form.Item>
@@ -197,10 +212,18 @@ const UserDetailPage: React.FC = () => {
               <Col span={8}>
                 <Card title="Referral & Metadata">
                   <Descriptions column={1}>
-                    <Descriptions.Item label="Referral Code">{user?.referral_code}</Descriptions.Item>
-                    <Descriptions.Item label="Referred By">{user?.referred_by || "N/A"}</Descriptions.Item>
-                    <Descriptions.Item label="Referral Count">{user?.referral_count || 0}</Descriptions.Item>
-                    <Descriptions.Item label="KYC Status">{user?.kyc_status || "N/A"}</Descriptions.Item>
+                    <Descriptions.Item label="Referral Code">
+                      {typeof user?.referral_code === "string" ? user.referral_code : "N/A"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Referred By">
+                      {typeof user?.referred_by === "string" ? user.referred_by : "N/A"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Referral Count">
+                      {typeof user?.referral_count === "number" ? user.referral_count : 0}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="KYC Status">
+                      {user?.kyc_status || "N/A"}
+                    </Descriptions.Item>
                     <Descriptions.Item label="Created At">
                       {user?.created_at ? new Date(user.created_at).toLocaleString() : "N/A"}
                     </Descriptions.Item>

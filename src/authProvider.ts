@@ -5,30 +5,26 @@ export const authProvider: AuthProvider = {
     localStorage.setItem("token", token);
     return { success: true };
   },
+
   logout: async () => {
     localStorage.removeItem("token");
     return { success: true };
   },
+
   check: async () => {
-    return localStorage.getItem("token")
+    const token = localStorage.getItem("token");
+    return token
       ? { authenticated: true }
       : { authenticated: false, redirectTo: "/login" };
   },
-  getPermissions: async () => {
-    return null;
-  },
-  getIdentity: async () => {
-    return {
-      name: "Admin",
-      avatar: "",
-    };
-  },
-  // ✅ Add these two missing methods to fix the build error:
-  check: async () => {
-    return localStorage.getItem("token")
-      ? { authenticated: true }
-      : { authenticated: false };
-  },
+
+  getPermissions: async () => null,
+
+  getIdentity: async () => ({
+    name: "Admin",
+    avatar: "",
+  }),
+
   onError: async (error) => {
     console.error("Auth Error:", error);
     return {};

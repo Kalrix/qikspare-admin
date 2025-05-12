@@ -8,10 +8,12 @@ import {
 import axios from "axios";
 import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
-import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 
+dayjs.extend(isBetween);
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -72,15 +74,15 @@ const InvoicesPage = () => {
   ) => {
     setDateRange(dates ?? [null, null]);
 
-    if (!dates || dates.length !== 2 || !dates[0] || !dates[1]) {
+    if (!dates || !dates[0] || !dates[1]) {
       setFilteredData(invoices);
       return;
     }
 
     const [start, end] = dates;
     const filtered = invoices.filter((inv: any) => {
-      const date = dayjs(inv.invoiceDate);
-      return date.isBetween(start, end, "day", "[]");
+      const invoiceDate = dayjs(inv.invoiceDate);
+      return invoiceDate.isBetween(start, end, "day", "[]");
     });
     setFilteredData(filtered);
   };

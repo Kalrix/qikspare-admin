@@ -1,8 +1,8 @@
 import ReactDOMServer from "react-dom/server";
+import React from "react";
 import InvoiceHTMLCustomer from "./InvoiceHTML-Customer";
 import InvoiceHTMLPlatform from "./InvoiceHTML-Platform";
 
-// ✅ Type definition for invoice
 interface InvoiceData {
   invoiceNumber: string;
   invoiceDate: string;
@@ -21,11 +21,9 @@ export const generateInvoiceHTML = (
   type: "customer" | "platform"
 ): string => {
   const component =
-    type === "customer" ? (
-      <InvoiceHTMLCustomer invoice={invoice} />
-    ) : (
-      <InvoiceHTMLPlatform invoice={invoice} />
-    );
+    type === "customer"
+      ? React.createElement(InvoiceHTMLCustomer, { invoice })
+      : React.createElement(InvoiceHTMLPlatform, { invoice });
 
   return ReactDOMServer.renderToStaticMarkup(component);
 };

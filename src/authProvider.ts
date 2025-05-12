@@ -1,5 +1,7 @@
-export const authProvider = {
-  login: async ({ token }: { token: string }) => {
+import { AuthProvider } from "@refinedev/core";
+
+export const authProvider: AuthProvider = {
+  login: async ({ token }) => {
     localStorage.setItem("token", token);
     return { success: true };
   },
@@ -8,26 +10,27 @@ export const authProvider = {
     return { success: true };
   },
   checkAuth: async () => {
-    const token = localStorage.getItem("token");
-    return token ? { authenticated: true } : { authenticated: false };
+    return localStorage.getItem("token")
+      ? { authenticated: true }
+      : { authenticated: false, redirectTo: "/login" };
   },
-  getPermissions: async () => null,
+  getPermissions: async () => {
+    return null;
+  },
   getIdentity: async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-
-    // Optional: decode token or fetch user details here
     return {
-      id: "user", // Replace with real ID if available
-      name: "User", // Replace with name if available
+      name: "Admin",
+      avatar: "",
     };
   },
+  // ✅ Add these two missing methods to fix the build error:
   check: async () => {
-    const token = localStorage.getItem("token");
-    return token ? { authenticated: true } : { authenticated: false };
+    return localStorage.getItem("token")
+      ? { authenticated: true }
+      : { authenticated: false };
   },
-  onError: async (error: any) => {
-    console.error("Auth error:", error);
-    return { logout: false };
+  onError: async (error) => {
+    console.error("Auth Error:", error);
+    return {};
   },
 };

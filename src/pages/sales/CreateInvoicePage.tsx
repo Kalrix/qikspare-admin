@@ -15,23 +15,33 @@ const { Content, Sider } = Layout;
 const { Title } = Typography;
 const paymentModes = ["UPI", "Cash", "Card", "NetBanking", "Wallet"];
 
+type PartyOption = {
+  label: string;
+  value: string;
+  address: string;
+  phone: string;
+  email: string;
+  gstin: string;
+  name: string;
+};
+
 const CreateInvoicePage = () => {
   const [form] = Form.useForm();
   const [items, setItems] = useState<any[]>([]);
   const [deliveryCharge, setDeliveryCharge] = useState<number>(100);
-  const [platformFee, setPlatformFee] = useState<number>(299); // ✅ platformFee state
-  const [selectedVendor, setSelectedVendor] = useState<any>(null);
-  const [selectedGarage, setSelectedGarage] = useState<any>(null);
+  const [platformFee, setPlatformFee] = useState<number>(299);
+  const [selectedVendor, setSelectedVendor] = useState<PartyOption | null>(null);
+  const [selectedGarage, setSelectedGarage] = useState<PartyOption | null>(null);
   const [paymentMode, setPaymentMode] = useState<string>("UPI");
   const [loading, setLoading] = useState(false);
-  const [garages, setGarages] = useState([]);
-  const [vendors, setVendors] = useState([]);
+  const [garages, setGarages] = useState<PartyOption[]>([]);
+  const [vendors, setVendors] = useState<PartyOption[]>([]);
 
   useEffect(() => {
     axios.get("http://localhost:8000/api/admin/users", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }).then(res => {
-      const allUsers = res.data.users || [];
+      const allUsers: any[] = res.data.users || [];
 
       const formatAddress = (location: any) => {
         if (!location) return "";
@@ -39,17 +49,31 @@ const CreateInvoicePage = () => {
         return [addressLine, city, state, pincode].filter(Boolean).join(", ");
       };
 
-      setGarages(allUsers.filter(u => u.role === "garage").map(u => ({
-        label: u.full_name || u.username, value: u._id,
-        address: formatAddress(u.location), phone: u.phone, email: u.email,
-        gstin: u.gstin || "", name: u.full_name || u.username
-      })));
+      setGarages(allUsers
+        .filter((u: any) => u.role === "garage")
+        .map((u: any) => ({
+          label: u.full_name || u.username,
+          value: u._id,
+          address: formatAddress(u.location),
+          phone: u.phone,
+          email: u.email,
+          gstin: u.gstin || "",
+          name: u.full_name || u.username
+        }))
+      );
 
-      setVendors(allUsers.filter(u => u.role === "vendor").map(u => ({
-        label: u.full_name || u.username, value: u._id,
-        address: formatAddress(u.location), phone: u.phone, email: u.email,
-        gstin: u.gstin || "", name: u.full_name || u.username
-      })));
+      setVendors(allUsers
+        .filter((u: any) => u.role === "vendor")
+        .map((u: any) => ({
+          label: u.full_name || u.username,
+          value: u._id,
+          address: formatAddress(u.location),
+          phone: u.phone,
+          email: u.email,
+          gstin: u.gstin || "",
+          name: u.full_name || u.username
+        }))
+      );
     }).catch(() => message.error("Failed to fetch users."));
   }, []);
 
@@ -164,31 +188,70 @@ const CreateInvoicePage = () => {
   const totals = calculateTotal();
 
   const columns = [
-    { title: "Part Name", render: (_: any, __: any, i: number) => (
-        <Input value={items[i]?.partName} onChange={(e) => handleItemChange(i, "partName", e.target.value)} />) },
-    { title: "Model No.", render: (_: any, __: any, i: number) => (
-        <Input value={items[i]?.modelNo} onChange={(e) => handleItemChange(i, "modelNo", e.target.value)} />) },
-    { title: "Category", render: (_: any, __: any, i: number) => (
-        <Input value={items[i]?.category} onChange={(e) => handleItemChange(i, "category", e.target.value)} />) },
-    { title: "Unit Price", render: (_: any, __: any, i: number) => (
-        <InputNumber value={items[i]?.unitPrice} onChange={(v) => handleItemChange(i, "unitPrice", v)} />) },
-    { title: "Qty", render: (_: any, __: any, i: number) => (
-        <InputNumber value={items[i]?.quantity} onChange={(v) => handleItemChange(i, "quantity", v)} />) },
-    { title: "₹ Discount", render: (_: any, __: any, i: number) => (
-        <InputNumber value={items[i]?.discountAmount} onChange={(v) => handleItemChange(i, "discountAmount", v)} />) },
-    { title: "% Discount", render: (_: any, __: any, i: number) => (
-        <InputNumber value={items[i]?.discountPercent} onChange={(v) => handleItemChange(i, "discountPercent", v)} />) },
-    { title: "GST %", render: (_: any, __: any, i: number) => (
-        <InputNumber value={items[i]?.gst} onChange={(v) => handleItemChange(i, "gst", v)} />) },
-    { title: "Total", render: (_: any, __: any, i: number) => {
+    {
+      title: "Part Name",
+      render: (_: any, __: any, i: number) => (
+        <Input value={items[i]?.partName} onChange={(e) => handleItemChange(i, "partName", e.target.value)} />
+      )
+    },
+    {
+      title: "Model No.",
+      render: (_: any, __: any, i: number) => (
+        <Input value={items[i]?.modelNo} onChange={(e) => handleItemChange(i, "modelNo", e.target.value)} />
+      )
+    },
+    {
+      title: "Category",
+      render: (_: any, __: any, i: number) => (
+        <Input value={items[i]?.category} onChange={(e) => handleItemChange(i, "category", e.target.value)} />
+      )
+    },
+    {
+      title: "Unit Price",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber value={items[i]?.unitPrice} onChange={(v) => handleItemChange(i, "unitPrice", v ?? 0)} />
+      )
+    },
+    {
+      title: "Qty",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber value={items[i]?.quantity} onChange={(v) => handleItemChange(i, "quantity", v ?? 1)} />
+      )
+    },
+    {
+      title: "₹ Discount",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber value={items[i]?.discountAmount} onChange={(v) => handleItemChange(i, "discountAmount", v ?? 0)} />
+      )
+    },
+    {
+      title: "% Discount",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber value={items[i]?.discountPercent} onChange={(v) => handleItemChange(i, "discountPercent", v ?? 0)} />
+      )
+    },
+    {
+      title: "GST %",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber value={items[i]?.gst} onChange={(v) => handleItemChange(i, "gst", v ?? 0)} />
+      )
+    },
+    {
+      title: "Total",
+      render: (_: any, __: any, i: number) => {
         const it = items[i];
+        if (!it) return "";
         const base = it.unitPrice * it.quantity;
         const discount = base - it.discountAmount;
         const gst = (discount * it.gst) / 100;
         return `₹${(discount + gst).toFixed(2)}`;
-    }},
-    { render: (_: any, __: any, i: number) => (
-        <Button icon={<DeleteOutlined />} danger onClick={() => handleRemoveItem(i)} />) }
+      }
+    },
+    {
+      render: (_: any, __: any, i: number) => (
+        <Button icon={<DeleteOutlined />} danger onClick={() => handleRemoveItem(i)} />
+      )
+    }
   ];
 
   return (
@@ -205,7 +268,7 @@ const CreateInvoicePage = () => {
                 <Col span={8}>
                   <Title level={5}>👤 Buyer (Garage)</Title>
                   <Select placeholder="Select Garage" options={garages} style={{ width: "100%" }}
-                    onChange={(val) => setSelectedGarage(garages.find(g => g.value === val))} />
+                    onChange={(val) => setSelectedGarage(garages.find(g => g.value === val) || null)} />
                   {selectedGarage && (
                     <>
                       <p><strong>Name:</strong> {selectedGarage.name}</p>
@@ -218,7 +281,7 @@ const CreateInvoicePage = () => {
                 <Col span={8}>
                   <Title level={5}>🏢 Seller (Vendor)</Title>
                   <Select placeholder="Select Vendor" options={vendors} style={{ width: "100%" }}
-                    onChange={(val) => setSelectedVendor(vendors.find(v => v.value === val))} />
+                    onChange={(val) => setSelectedVendor(vendors.find(v => v.value === val) || null)} />
                   {selectedVendor && (
                     <>
                       <p><strong>Name:</strong> {selectedVendor.name}</p>
@@ -238,7 +301,7 @@ const CreateInvoicePage = () => {
                     style={{ width: "100%" }}
                     value={platformFee}
                     addonBefore="Platform Fee"
-                    onChange={(val) => setPlatformFee(val || 0)}
+                    onChange={(val) => setPlatformFee(val ?? 0)}
                   />
                 </Col>
               </Row>
@@ -255,7 +318,7 @@ const CreateInvoicePage = () => {
                 <Row justify="space-between"><Col>Subtotal:</Col><Col>₹{totals.subtotal.toFixed(2)}</Col></Row>
                 <Row justify="space-between"><Col>Total GST:</Col><Col>₹{totals.tax.toFixed(2)}</Col></Row>
                 <Row justify="space-between"><Col>Delivery Charges:</Col>
-                  <Col><InputNumber value={deliveryCharge} onChange={setDeliveryCharge} /></Col></Row>
+                  <Col><InputNumber value={deliveryCharge} onChange={(val) => setDeliveryCharge(val ?? 0)} /></Col></Row>
                 <Divider />
                 <Row justify="space-between"><Col><strong>Total:</strong></Col>
                   <Col><strong>₹{totals.total.toFixed(2)}</strong></Col></Row>

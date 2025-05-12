@@ -19,7 +19,8 @@ const InvoicesPage = () => {
   const [invoices, setInvoices] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  const [dateRange, setDateRange] = useState<any[]>([]);
+  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
+
   const navigate = useNavigate();
 
   useEffect(() => {

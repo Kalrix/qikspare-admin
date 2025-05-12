@@ -9,7 +9,7 @@ export const authProvider: AuthProvider = {
     localStorage.removeItem("token");
     return { success: true };
   },
-  checkAuth: async () => {
+  check: async () => {
     return localStorage.getItem("token")
       ? { authenticated: true }
       : { authenticated: false, redirectTo: "/login" };

@@ -229,7 +229,8 @@ const InvoiceDetailPage = () => {
               columns={columns}
               dataSource={invoice.items}
               pagination={false}
-              rowKey={(_, i) => i?.toString()}
+              rowKey={(_, i) => (i !== undefined ? i.toString() : String(Math.random()))}
+
             />
             <Button
               block icon={<PlusOutlined />}

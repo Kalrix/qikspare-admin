@@ -10,7 +10,8 @@ import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import { Dayjs } from "dayjs"; // ✅ Fix: Add Dayjs type
+import dayjs from "dayjs";
+
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -78,7 +79,7 @@ const InvoicesPage = () => {
 
     const [start, end] = dates;
     const filtered = invoices.filter((inv: any) => {
-      const date = moment(inv.invoiceDate);
+      const date = dayjs(inv.invoiceDate);
       return date.isBetween(start, end, "day", "[]");
     });
     setFilteredData(filtered);

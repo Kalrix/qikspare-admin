@@ -2,6 +2,7 @@ import { Refine } from "@refinedev/core";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import routerBindings from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
+import axios from "axios";
 
 import LoginPage from "./pages/login/LoginPage";
 import DashboardPage from "./pages/dashboard";
@@ -18,20 +19,20 @@ const API_BASE = import.meta.env.PROD
   ? "https://qikspare-api.onrender.com"
   : "http://127.0.0.1:8000";
 
-// ✅ Custom fetch to inject token
-const customFetch = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem("token");
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      Authorization: token ? `Bearer ${token}` : "",
-      "Content-Type": "application/json",
-    },
-  });
-};
+// ✅ Axios instance with token injection
+const axiosInstance = axios.create({
+  baseURL: API_BASE,
+});
 
-const dataProvider = dataProviderFactory(API_BASE, customFetch);
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const dataProvider = dataProviderFactory(API_BASE, axiosInstance);
 
 function App() {
   return (
@@ -49,16 +50,11 @@ function App() {
           ]}
         >
           <Routes>
-            {/* Auth & Dashboard */}
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-
-            {/* Users */}
             <Route path="/users" element={<UsersPage />} />
             <Route path="/users/:id" element={<UserDetailPage />} />
-
-            {/* Invoices */}
             <Route path="/sales/invoices" element={<InvoicesPage />} />
             <Route path="/sales/create-invoice" element={<CreateInvoicePage />} />
             <Route path="/sales/invoice/:id" element={<InvoiceViewPage />} />

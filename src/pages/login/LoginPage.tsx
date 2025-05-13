@@ -3,7 +3,7 @@ import { useLogin } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import "../../styles/login.css";
-import { API_BASE_URL } from "../../config";
+import { API_BASE_URL, axiosInstance } from "../../config"; // ✅ Axios instance with auth
 
 const quotes = [
   "Speed is everything. Quality is the key.",
@@ -24,7 +24,6 @@ const LoginPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const quote = quotes[new Date().getDay()];
-  const API_BASE = `${API_BASE_URL}/api/auth`;
 
   const requestOtp = async () => {
     if (!/^\d{10}$/.test(phone)) {
@@ -33,20 +32,11 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/request-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setStep(2);
-        message.success("OTP sent!");
-      } else {
-        message.error(data.detail || "Failed to send OTP.");
-      }
-    } catch {
-      message.error("Network error.");
+      const res = await axiosInstance.post("/api/auth/request-otp", { phone });
+      setStep(2);
+      message.success("OTP sent!");
+    } catch (err: any) {
+      message.error(err?.response?.data?.detail || "Failed to send OTP.");
     } finally {
       setLoading(false);
     }
@@ -59,25 +49,23 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp, role: "admin" }),
+      const res = await axiosInstance.post("/api/auth/verify-otp", {
+        phone,
+        otp,
+        role: "admin",
       });
 
-      const data = await res.json();
-      const token = data.token || data.access_token;
-
-      if (res.ok && token) {
+      const token = res.data.token || res.data.access_token;
+      if (token) {
         localStorage.setItem("token", token);
         login({ token });
         message.success("Login successful!");
         navigate("/dashboard");
       } else {
-        message.error(data.detail || "Invalid OTP");
+        message.error("Invalid response from server");
       }
-    } catch {
-      message.error("Verification failed");
+    } catch (err: any) {
+      message.error(err?.response?.data?.detail || "Verification failed");
     } finally {
       setLoading(false);
     }
@@ -85,7 +73,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="login-container">
-      {/* Left Panel (Login) */}
+      {/* Left Panel */}
       <div className="left-panel">
         <div className="login-card">
           <h2>Welcome back 👋</h2>
@@ -114,10 +102,7 @@ const LoginPage: React.FC = () => {
             </>
           )}
 
-          <button
-            onClick={step === 1 ? requestOtp : verifyOtp}
-            disabled={loading}
-          >
+          <button onClick={step === 1 ? requestOtp : verifyOtp} disabled={loading}>
             {loading
               ? step === 1
                 ? "Sending..."
@@ -129,7 +114,7 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Panel (Branding) */}
+      {/* Right Panel */}
       <div className="right-panel">
         <div className="branding-content glass-card">
           <img src="/qikspare-logo.png" alt="QikSpare" className="branding-logo" />

@@ -1,4 +1,3 @@
-// Updated CreateInvoicePage.tsx
 import React, { useEffect, useState } from "react";
 import {
   Layout, Input, Button, Card, Space, Row, Col, Table,
@@ -13,7 +12,6 @@ import Sidebar from "../dashboard/components/Sidebar";
 import html2pdf from "html2pdf.js";
 import { generateInvoiceHTML } from "../../components/invoice/generateInvoiceHtml";
 import { API_BASE_URL } from "../../config";
-
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -42,7 +40,7 @@ const CreateInvoicePage = () => {
   const [vendors, setVendors] = useState<PartyOption[]>([]);
 
   useEffect(() => {
-    axios.get("${API_BASE_URL}/api/admin/users", {
+    axios.get(`${API_BASE_URL}/api/admin/users`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }).then(res => {
       const allUsers: any[] = res.data.users || [];
@@ -53,27 +51,33 @@ const CreateInvoicePage = () => {
         return [addressLine, city, state, pincode].filter(Boolean).join(", ");
       };
 
-      setGarages(allUsers.filter((u: any) => u.role === "garage")
-        .map((u: any) => ({
-          label: u.full_name || u.username,
-          value: u._id,
-          address: formatAddress(u.location),
-          phone: u.phone,
-          email: u.email,
-          gstin: u.gstin || "",
-          name: u.full_name || u.username
-        })));
+      setGarages(
+        allUsers
+          .filter((u: any) => u.role === "garage")
+          .map((u: any) => ({
+            label: u.full_name || u.username,
+            value: u._id,
+            address: formatAddress(u.location),
+            phone: u.phone,
+            email: u.email,
+            gstin: u.gstin || "",
+            name: u.full_name || u.username,
+          }))
+      );
 
-      setVendors(allUsers.filter((u: any) => u.role === "vendor")
-        .map((u: any) => ({
-          label: u.full_name || u.username,
-          value: u._id,
-          address: formatAddress(u.location),
-          phone: u.phone,
-          email: u.email,
-          gstin: u.gstin || "",
-          name: u.full_name || u.username
-        })));
+      setVendors(
+        allUsers
+          .filter((u: any) => u.role === "vendor")
+          .map((u: any) => ({
+            label: u.full_name || u.username,
+            value: u._id,
+            address: formatAddress(u.location),
+            phone: u.phone,
+            email: u.email,
+            gstin: u.gstin || "",
+            name: u.full_name || u.username,
+          }))
+      );
     }).catch(() => message.error("Failed to fetch users."));
   }, []);
 
@@ -88,10 +92,19 @@ const CreateInvoicePage = () => {
   };
 
   const handleAddNewRow = () => {
-    setItems([...items, {
-      partName: "", modelNo: "", category: "",
-      unitPrice: 0, quantity: 1, discountAmount: 0, discountPercent: 0, gst: 18
-    }]);
+    setItems([
+      ...items,
+      {
+        partName: "",
+        modelNo: "",
+        category: "",
+        unitPrice: 0,
+        quantity: 1,
+        discountAmount: 0,
+        discountPercent: 0,
+        gst: 18,
+      },
+    ]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -101,7 +114,8 @@ const CreateInvoicePage = () => {
   };
 
   const calculateTotal = () => {
-    let subtotal = 0, tax = 0;
+    let subtotal = 0;
+    let tax = 0;
     for (const item of items) {
       const base = item.unitPrice * item.quantity;
       const discounted = base - item.discountAmount;
@@ -113,12 +127,14 @@ const CreateInvoicePage = () => {
   };
 
   const handleDownloadInvoice = async (type: "customer" | "platform") => {
-    if (!selectedVendor || !selectedGarage || !items.length) return message.error("Fill all fields");
+    if (!selectedVendor || !selectedGarage || !items.length) {
+      return message.error("Fill all fields");
+    }
 
     const invoiceDate = new Date().toISOString().split("T")[0];
     const total = calculateTotal().total;
     const payload = {
-      invoiceType: "customer",
+      invoiceType: type,
       buyer: selectedGarage,
       seller: selectedVendor,
       items,
@@ -136,12 +152,14 @@ const CreateInvoicePage = () => {
       margin: 0,
       filename: `${type}_invoice_${Date.now()}.pdf`,
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     }).save();
   };
 
   const handleSaveInvoice = async () => {
-    if (!selectedVendor || !selectedGarage || !items.length) return message.error("Fill all fields");
+    if (!selectedVendor || !selectedGarage || !items.length) {
+      return message.error("Fill all fields");
+    }
 
     const invoiceDate = new Date().toISOString().split("T")[0];
     const payload = {
@@ -149,18 +167,18 @@ const CreateInvoicePage = () => {
       buyer: {
         userId: selectedGarage.value,
         name: selectedGarage.label,
-        address: selectedGarage.address || "",
-        phone: selectedGarage.phone || "",
-        email: selectedGarage.email || "",
-        gstin: selectedGarage.gstin || ""
+        address: selectedGarage.address,
+        phone: selectedGarage.phone,
+        email: selectedGarage.email,
+        gstin: selectedGarage.gstin,
       },
       seller: {
         userId: selectedVendor.value,
         name: selectedVendor.label,
-        address: selectedVendor.address || "",
-        phone: selectedVendor.phone || "",
-        email: selectedVendor.email || "",
-        gstin: selectedVendor.gstin || ""
+        address: selectedVendor.address,
+        phone: selectedVendor.phone,
+        email: selectedVendor.email,
+        gstin: selectedVendor.gstin,
       },
       items,
       deliveryCharge,
@@ -171,7 +189,7 @@ const CreateInvoicePage = () => {
 
     try {
       setLoading(true);
-      await axios.post("${API_BASE_URL}/api/invoices/api/invoices/create", payload, {
+      await axios.post(`${API_BASE_URL}/api/invoices/api/invoices/create`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       message.success("Invoice saved successfully.");
@@ -183,81 +201,104 @@ const CreateInvoicePage = () => {
     }
   };
 
-  const totals = calculateTotal();
-
   const columns = [
     {
       title: "Part Name",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <Input value={items[i]?.partName} onChange={(e) => handleItemChange(i, "partName", e.target.value)} />
-        ) : null
+        i !== undefined && (
+          <Input
+            value={items[i]?.partName}
+            onChange={(e) => handleItemChange(i, "partName", e.target.value)}
+          />
+        ),
     },
     {
       title: "Model No.",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <Input value={items[i]?.modelNo} onChange={(e) => handleItemChange(i, "modelNo", e.target.value)} />
-        ) : null
+        i !== undefined && (
+          <Input
+            value={items[i]?.modelNo}
+            onChange={(e) => handleItemChange(i, "modelNo", e.target.value)}
+          />
+        ),
     },
     {
       title: "Category",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <Input value={items[i]?.category} onChange={(e) => handleItemChange(i, "category", e.target.value)} />
-        ) : null
+        i !== undefined && (
+          <Input
+            value={items[i]?.category}
+            onChange={(e) => handleItemChange(i, "category", e.target.value)}
+          />
+        ),
     },
     {
       title: "Unit Price",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <InputNumber value={items[i]?.unitPrice} onChange={(v) => handleItemChange(i, "unitPrice", v ?? 0)} />
-        ) : null
+        i !== undefined && (
+          <InputNumber
+            value={items[i]?.unitPrice}
+            onChange={(v) => handleItemChange(i, "unitPrice", v ?? 0)}
+          />
+        ),
     },
     {
       title: "Qty",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <InputNumber value={items[i]?.quantity} onChange={(v) => handleItemChange(i, "quantity", v ?? 1)} />
-        ) : null
+        i !== undefined && (
+          <InputNumber
+            value={items[i]?.quantity}
+            onChange={(v) => handleItemChange(i, "quantity", v ?? 1)}
+          />
+        ),
     },
     {
       title: "₹ Discount",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <InputNumber value={items[i]?.discountAmount} onChange={(v) => handleItemChange(i, "discountAmount", v ?? 0)} />
-        ) : null
+        i !== undefined && (
+          <InputNumber
+            value={items[i]?.discountAmount}
+            onChange={(v) => handleItemChange(i, "discountAmount", v ?? 0)}
+          />
+        ),
     },
     {
       title: "% Discount",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <InputNumber value={items[i]?.discountPercent} onChange={(v) => handleItemChange(i, "discountPercent", v ?? 0)} />
-        ) : null
+        i !== undefined && (
+          <InputNumber
+            value={items[i]?.discountPercent}
+            onChange={(v) => handleItemChange(i, "discountPercent", v ?? 0)}
+          />
+        ),
     },
     {
       title: "GST %",
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? (
-          <InputNumber value={items[i]?.gst} onChange={(v) => handleItemChange(i, "gst", v ?? 0)} />
-        ) : null
+        i !== undefined && (
+          <InputNumber
+            value={items[i]?.gst}
+            onChange={(v) => handleItemChange(i, "gst", v ?? 0)}
+          />
+        ),
     },
     {
       title: "Total",
       render: (_: any, __: any, i: number | undefined) => {
         if (i === undefined) return null;
         const it = items[i];
-        if (!it) return "";
         const base = it.unitPrice * it.quantity;
-        const discount = base - it.discountAmount;
-        const gst = (discount * it.gst) / 100;
-        return `₹${(discount + gst).toFixed(2)}`;
-      }
+        const discounted = base - it.discountAmount;
+        const gst = (discounted * it.gst) / 100;
+        return `₹${(discounted + gst).toFixed(2)}`;
+      },
     },
     {
       render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined ? <Button icon={<DeleteOutlined />} danger onClick={() => handleRemoveItem(i)} /> : null
-    }
+        i !== undefined && (
+          <Button icon={<DeleteOutlined />} danger onClick={() => handleRemoveItem(i)} />
+        ),
+    },
   ];
 
   return (
@@ -268,8 +309,7 @@ const CreateInvoicePage = () => {
         <Layout style={{ padding: 24 }}>
           <Content>
             <Title level={3}>🧾 Create Invoice</Title>
-            {/* UI sections as-is */}
-            {/* Table below fixed */}
+
             <Card title="🔧 Spare Parts / Services">
               <Table
                 columns={columns}
@@ -278,9 +318,53 @@ const CreateInvoicePage = () => {
                 rowKey={(_, i) => (i !== undefined ? i.toString() : Math.random().toString())}
               />
               <Divider />
-              <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddNewRow}>Add Item</Button>
+              <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddNewRow}>
+                Add Item
+              </Button>
             </Card>
-            {/* Remaining UI unchanged */}
+
+            <Divider />
+
+            <Space style={{ marginBottom: 12 }}>
+              <Select
+                value={selectedGarage?.value}
+                onChange={(val) => setSelectedGarage(garages.find(g => g.value === val) || null)}
+                options={garages}
+                placeholder="Select Garage (Buyer)"
+                style={{ width: 250 }}
+              />
+              <Select
+                value={selectedVendor?.value}
+                onChange={(val) => setSelectedVendor(vendors.find(v => v.value === val) || null)}
+                options={vendors}
+                placeholder="Select Vendor (Seller)"
+                style={{ width: 250 }}
+              />
+              <Select
+                value={paymentMode}
+                onChange={setPaymentMode}
+                options={paymentModes.map((m) => ({ label: m, value: m }))}
+                style={{ width: 180 }}
+              />
+            </Space>
+
+            <Row gutter={12} style={{ marginTop: 12 }}>
+              <Col>
+                <Button icon={<SaveOutlined />} onClick={handleSaveInvoice} loading={loading}>
+                  Save
+                </Button>
+              </Col>
+              <Col>
+                <Button icon={<FilePdfOutlined />} onClick={() => handleDownloadInvoice("customer")}>
+                  Download Customer PDF
+                </Button>
+              </Col>
+              <Col>
+                <Button icon={<FilePdfOutlined />} onClick={() => handleDownloadInvoice("platform")}>
+                  Download Platform PDF
+                </Button>
+              </Col>
+            </Row>
           </Content>
         </Layout>
       </Layout>

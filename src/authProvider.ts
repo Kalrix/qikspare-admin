@@ -1,3 +1,5 @@
+// src/authProvider.ts
+
 import { AuthProvider } from "@refinedev/core";
 
 export const authProvider: AuthProvider = {
@@ -12,10 +14,16 @@ export const authProvider: AuthProvider = {
   },
 
   check: async () => {
-    const token = localStorage.getItem("token");
-    return token
-      ? { authenticated: true }
-      : { authenticated: false, redirectTo: "/login" };
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        return { authenticated: true };
+      } else {
+        return { authenticated: false, redirectTo: "/login" };
+      }
+    } catch (error) {
+      return { authenticated: false, redirectTo: "/login" };
+    }
   },
 
   getPermissions: async () => null,
@@ -23,10 +31,9 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const token = localStorage.getItem("token");
     if (!token) return null;
-
     return {
-      name: "Admin", // Or fetch /me from backend
-      avatar: "",    // Optional
+      name: "Admin",
+      avatar: "",
     };
   },
 

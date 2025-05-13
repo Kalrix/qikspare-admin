@@ -3,7 +3,9 @@ import {
   Layout, Table, Input, InputNumber, Button, Space, Typography,
   Card, Row, Col, Divider, message
 } from "antd";
-import { PlusOutlined, SaveOutlined, FilePdfOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined, SaveOutlined, FilePdfOutlined
+} from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Topbar from "../dashboard/components/Topbar";
@@ -12,11 +14,10 @@ import html2pdf from "html2pdf.js";
 import { generateInvoiceHTML } from "../../components/invoice/generateInvoiceHtml";
 import { API_BASE_URL } from "../../config";
 
-
 const { Content, Sider } = Layout;
 const { Title } = Typography;
 
-const InvoiceDetailPage = () => {
+const InvoiceDetailPage: React.FC = () => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -37,13 +38,19 @@ const InvoiceDetailPage = () => {
   };
 
   const handleItemChange = (index: number, field: string, value: any) => {
-    const updated = [...invoice.items];
-    const item = updated[index];
+    const updatedItems = [...invoice.items];
+    const item = updatedItems[index];
     item[field] = value;
+
     const base = item.unitPrice * item.quantity;
-    if (field === "discountAmount") item.discountPercent = base ? (value / base) * 100 : 0;
-    if (field === "discountPercent") item.discountAmount = base ? (value / 100) * base : 0;
-    setInvoice({ ...invoice, items: updated });
+    if (field === "discountAmount") {
+      item.discountPercent = base ? (value / base) * 100 : 0;
+    }
+    if (field === "discountPercent") {
+      item.discountAmount = base ? (value / 100) * base : 0;
+    }
+
+    setInvoice({ ...invoice, items: updatedItems });
   };
 
   const handleAddItem = () => {
@@ -61,6 +68,7 @@ const InvoiceDetailPage = () => {
 
   const calculateTotals = () => {
     let subTotal = 0, totalTax = 0;
+
     invoice.items.forEach((item: any) => {
       const base = item.unitPrice * item.quantity;
       const discounted = base - item.discountAmount;
@@ -72,94 +80,82 @@ const InvoiceDetailPage = () => {
     const delivery = Number(invoice.deliveryCharge || 0);
     const platform = Number(invoice.platformFee || 0);
     const totalAmount = subTotal + totalTax + delivery + platform;
+
     return { subTotal, totalTax, totalAmount };
   };
 
-  const { subTotal, totalTax, totalAmount } = invoice
-    ? calculateTotals()
-    : { subTotal: 0, totalTax: 0, totalAmount: 0 };
+  if (!invoice) return null;
+
+  const { subTotal, totalTax, totalAmount } = calculateTotals();
 
   const columns = [
     {
-      title: "Part", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <Input
-            value={invoice.items[i]?.partName}
-            onChange={e => handleItemChange(i, "partName", e.target.value)}
-          />
-        );
-      }
+      title: "Part",
+      render: (_: any, __: any, i: number) => (
+        <Input
+          value={invoice.items[i]?.partName}
+          onChange={e => handleItemChange(i, "partName", e.target.value)}
+        />
+      )
     },
     {
-      title: "Model No", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <Input
-            value={invoice.items[i]?.modelNo}
-            onChange={e => handleItemChange(i, "modelNo", e.target.value)}
-          />
-        );
-      }
+      title: "Model No",
+      render: (_: any, __: any, i: number) => (
+        <Input
+          value={invoice.items[i]?.modelNo}
+          onChange={e => handleItemChange(i, "modelNo", e.target.value)}
+        />
+      )
     },
     {
-      title: "Qty", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <InputNumber
-            value={invoice.items[i]?.quantity}
-            onChange={v => handleItemChange(i, "quantity", v ?? 1)}
-          />
-        );
-      }
+      title: "Qty",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber
+          min={1}
+          value={invoice.items[i]?.quantity}
+          onChange={v => handleItemChange(i, "quantity", v ?? 1)}
+        />
+      )
     },
     {
-      title: "Unit ₹", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <InputNumber
-            value={invoice.items[i]?.unitPrice}
-            onChange={v => handleItemChange(i, "unitPrice", v ?? 0)}
-          />
-        );
-      }
+      title: "Unit ₹",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber
+          value={invoice.items[i]?.unitPrice}
+          onChange={v => handleItemChange(i, "unitPrice", v ?? 0)}
+        />
+      )
     },
     {
-      title: "Disc ₹", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <InputNumber
-            value={invoice.items[i]?.discountAmount}
-            onChange={v => handleItemChange(i, "discountAmount", v ?? 0)}
-          />
-        );
-      }
+      title: "Disc ₹",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber
+          value={invoice.items[i]?.discountAmount}
+          onChange={v => handleItemChange(i, "discountAmount", v ?? 0)}
+        />
+      )
     },
     {
-      title: "Disc %", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <InputNumber
-            value={invoice.items[i]?.discountPercent}
-            onChange={v => handleItemChange(i, "discountPercent", v ?? 0)}
-          />
-        );
-      }
+      title: "Disc %",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber
+          value={invoice.items[i]?.discountPercent}
+          onChange={v => handleItemChange(i, "discountPercent", v ?? 0)}
+        />
+      )
     },
     {
-      title: "GST %", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
-        return (
-          <InputNumber
-            value={invoice.items[i]?.gst}
-            onChange={v => handleItemChange(i, "gst", v ?? 18)}
-          />
-        );
-      }
+      title: "GST %",
+      render: (_: any, __: any, i: number) => (
+        <InputNumber
+          value={invoice.items[i]?.gst}
+          onChange={v => handleItemChange(i, "gst", v ?? 18)}
+        />
+      )
     },
     {
-      title: "Total ₹", render: (_: any, __: any, i: number | undefined) => {
-        if (typeof i !== "number") return "";
+      title: "Total ₹",
+      render: (_: any, __: any, i: number) => {
         const item = invoice.items[i];
         const base = item.unitPrice * item.quantity;
         const discounted = base - item.discountAmount;
@@ -172,16 +168,13 @@ const InvoiceDetailPage = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      await axios.patch(`${API_BASE_URL}/api/invoices/api/invoices/update/${id}`, {
-        ...invoice,
-        subTotal,
-        totalTax,
-        totalAmount
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await axios.patch(
+        `${API_BASE_URL}/api/invoices/api/invoices/update/${id}`,
+        { ...invoice, subTotal, totalTax, totalAmount },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
       message.success("Invoice updated");
-    } catch (err) {
+    } catch {
       message.error("Failed to update invoice");
     } finally {
       setLoading(false);
@@ -189,15 +182,16 @@ const InvoiceDetailPage = () => {
   };
 
   const handleDownload = () => {
-    const html = generateInvoiceHTML({ ...invoice, subTotal, totalTax, totalAmount }, "customer");
+    const html = generateInvoiceHTML(
+      { ...invoice, subTotal, totalTax, totalAmount },
+      "customer"
+    );
     html2pdf().from(html).set({
       filename: `invoice_${invoice.invoiceNumber}.pdf`,
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
     }).save();
   };
-
-  if (!invoice) return null;
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -227,15 +221,17 @@ const InvoiceDetailPage = () => {
             </Card>
 
             <Divider />
+
             <Table
               columns={columns}
               dataSource={invoice.items}
               pagination={false}
-              rowKey={(_, i) => (i !== undefined ? i.toString() : String(Math.random()))}
-
+              rowKey={(_, i) => i?.toString() ?? Math.random().toString()}
             />
+
             <Button
-              block icon={<PlusOutlined />}
+              block
+              icon={<PlusOutlined />}
               onClick={handleAddItem}
               type="dashed"
               style={{ marginTop: 12 }}
@@ -244,6 +240,7 @@ const InvoiceDetailPage = () => {
             </Button>
 
             <Divider />
+
             <Row gutter={32}>
               <Col span={12}>
                 <InputNumber
@@ -264,6 +261,7 @@ const InvoiceDetailPage = () => {
             </Row>
 
             <Divider />
+
             <Space>
               <Button icon={<SaveOutlined />} type="primary" loading={loading} onClick={handleSave}>
                 Save Changes

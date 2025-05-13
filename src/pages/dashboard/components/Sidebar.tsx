@@ -10,8 +10,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../../../styles/dashboard.css";
 
-const Sidebar = () => {
+const Sidebar: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    navigate(`/${key}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   return (
     <div className="sidebar">
@@ -19,7 +28,7 @@ const Sidebar = () => {
         mode="inline"
         defaultSelectedKeys={["dashboard"]}
         style={{ borderRight: 0, background: "transparent", color: "#fff" }}
-        onClick={({ key }) => navigate(`/${key}`)}
+        onClick={handleMenuClick}
       >
         <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
           Dashboard
@@ -29,7 +38,6 @@ const Sidebar = () => {
           Users
         </Menu.Item>
 
-        {/* ✅ Sales Section */}
         <Menu.SubMenu key="sales" title="Sales" icon={<FileTextOutlined />}>
           <Menu.Item key="sales/create-invoice" icon={<PlusCircleOutlined />}>
             Create Invoice
@@ -45,14 +53,10 @@ const Sidebar = () => {
           type="text"
           icon={<LogoutOutlined />}
           danger
-          onClick={() => {
-            localStorage.clear();
-            window.location.href = "/";
-          }}
+          onClick={handleLogout}
         >
           Logout
         </Button>
-
         <Typography.Text className="sidebar-version">v1.0.0</Typography.Text>
       </div>
     </div>

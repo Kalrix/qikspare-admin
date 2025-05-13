@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Col, Row, Button, Collapse } from "antd";
+import { Card, Col, Row, Button } from "antd";
 import {
   DashboardOutlined,
   ClockCircleOutlined,
@@ -20,8 +20,6 @@ import {
   Pie,
   Cell,
 } from "recharts";
-
-const { Panel } = Collapse;
 
 const COLORS = ["#1677ff", "#13c2c2", "#facc15", "#f87171"];
 
@@ -56,7 +54,7 @@ const demandHeatmapData = [
   { zone: "Sadar Bazar", orders: 43 },
 ];
 
-const OverviewTab = () => {
+const OverviewTab: React.FC = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -83,7 +81,7 @@ const OverviewTab = () => {
         ))}
       </Row>
 
-      {/* Chart + Pie */}
+      {/* Line Chart + Pie Chart */}
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col xs={24} md={16}>
           <Card title="Order Volume Trend">
@@ -93,7 +91,12 @@ const OverviewTab = () => {
                 <XAxis dataKey="hour" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="orders" stroke="#1677ff" strokeWidth={3} />
+                <Line
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="#1677ff"
+                  strokeWidth={3}
+                />
               </LineChart>
             </ResponsiveContainer>
           </Card>
@@ -112,7 +115,10 @@ const OverviewTab = () => {
                   dataKey="value"
                 >
                   {orderCategories.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
               </PieChart>
@@ -121,7 +127,7 @@ const OverviewTab = () => {
         </Col>
       </Row>
 
-      {/* Expandable Demand Heatmap */}
+      {/* Heatmap Panel */}
       <Card
         title="Demand Heatmap"
         extra={
@@ -157,7 +163,11 @@ const OverviewTab = () => {
             <img
               src="/heatmap-placeholder.png"
               alt="Heatmap Visualization"
-              style={{ width: "100%", borderRadius: 8, border: "1px solid #e2e8f0" }}
+              style={{
+                width: "100%",
+                borderRadius: 8,
+                border: "1px solid #e2e8f0",
+              }}
             />
             <p style={{ textAlign: "center", color: "#64748b", marginTop: 8 }}>
               * Real-time demand concentration by zone

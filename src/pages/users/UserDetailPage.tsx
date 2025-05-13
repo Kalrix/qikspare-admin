@@ -15,82 +15,65 @@ import { API_BASE_URL } from "../../config";
 
 const { Content, Sider } = Layout;
 
-interface User {
-  _id: string;
-  full_name?: string;
-  email?: string;
-  phone?: string;
-  role?: string;
-  referral_code?: string;
-  referred_by?: string;
-  referral_count?: number;
-  kyc_status?: string;
-  created_at?: string;
-  updated_at?: string;
-  [key: string]: any;
-}
-
 const UserDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
   const [form] = Form.useForm();
+  const [user, setUser] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to fetch users");
-
-      const target = data.users.find((u: User) => u._id === id);
-      if (!target) throw new Error("User not found");
-
-      setUser(target);
-      form.setFieldsValue(target);
+      const found = data.users.find((u: any) => u._id === id);
+      if (!found) throw new Error("User not found");
+      setUser(found);
+      form.setFieldsValue(found);
     } catch (err: any) {
-      console.error(err);
-      message.error(err.message || "Error loading user");
+      message.error(err.message || "Failed to load user");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      fetchUser();
-    }
+    if (id) fetchUser();
   }, [id]);
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
 
-      const payload: Record<string, any> = {};
-      const fields = [
-        "full_name", "email", "business_name", "garage_name", "business_type",
-        "garage_size", "brands_served", "vehicle_types", "distributor_size",
-        "brands_carried", "category_focus", "pan_number", "gstin", "phone", "role", "location"
-      ];
-
-      for (const key of fields) {
-        if (key === "location") {
-          const loc = values.location || {};
-          const cleaned = Object.fromEntries(
-            Object.entries(loc).filter(([_, v]) => v !== undefined && v !== "")
-          );
-          payload.location = Object.keys(cleaned).length ? cleaned : null;
-        } else {
-          payload[key] = values[key] !== "" ? values[key] : null;
-        }
-      }
+      const payload: any = {
+        full_name: values.full_name || "",
+        email: values.email || "",
+        phone: values.phone || "",
+        business_name: values.business_name || "",
+        garage_name: values.garage_name || "",
+        business_type: values.business_type || "",
+        garage_size: values.garage_size || "",
+        distributor_size: values.distributor_size || "",
+        pan_number: values.pan_number || "",
+        gstin: values.gstin || "",
+        role: values.role || "",
+        brands_served: [],
+        vehicle_types: [],
+        brands_carried: [],
+        category_focus: [],
+        location: {
+          addressLine: values.location?.addressLine || "",
+          city: values.location?.city || "",
+          state: values.location?.state || "",
+          pincode: values.location?.pincode || "",
+        },
+      };
 
       const res = await fetch(`${API_BASE_URL}/api/admin/update-user/${id}`, {
         method: "PATCH",
@@ -110,8 +93,7 @@ const UserDetailPage: React.FC = () => {
         throw new Error(data.detail || "Update failed");
       }
     } catch (err: any) {
-      console.error(err);
-      message.error(err.message || "Form validation failed");
+      message.error(err.message || "Validation failed");
     }
   };
 
@@ -136,19 +118,11 @@ const UserDetailPage: React.FC = () => {
                   title="User Information"
                   extra={
                     editMode ? (
-                      <Button
-                        icon={<SaveOutlined />}
-                        type="primary"
-                        onClick={handleSave}
-                        loading={loading}
-                      >
+                      <Button icon={<SaveOutlined />} type="primary" onClick={handleSave} loading={loading}>
                         Save
                       </Button>
                     ) : (
-                      <Button
-                        icon={<EditOutlined />}
-                        onClick={() => setEditMode(true)}
-                      >
+                      <Button icon={<EditOutlined />} onClick={() => setEditMode(true)}>
                         Edit
                       </Button>
                     )
@@ -168,10 +142,10 @@ const UserDetailPage: React.FC = () => {
                         ["gstin", "GSTIN"],
                         ["pan_number", "PAN Number"],
                         ["role", "Role", true],
-                      ].map(([key, label, isDisabled]) => (
+                      ].map(([key, label, disabled]) => (
                         <Col span={12} key={key as string}>
                           <Form.Item name={key as string} label={label as string}>
-                            <Input disabled={!!isDisabled} />
+                            <Input disabled={!!disabled} />
                           </Form.Item>
                         </Col>
                       ))}
@@ -232,7 +206,6 @@ const UserDetailPage: React.FC = () => {
             </Row>
 
             <Divider />
-
             <Card title="Sales Pipeline (Coming Soon)">
               <p>This section will track onboarding, KYC, purchases, issues, and conversions.</p>
             </Card>

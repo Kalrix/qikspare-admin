@@ -15,6 +15,7 @@ import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import { API_BASE_URL } from "../../config";
+import { useNavigate } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 const { TabPane } = Tabs;
@@ -25,6 +26,7 @@ const UsersPage: React.FC = () => {
   const [activeUser, setActiveUser] = useState<any | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -40,7 +42,7 @@ const UsersPage: React.FC = () => {
       } else {
         message.error(data.detail || "Failed to fetch users");
       }
-    } catch (err) {
+    } catch {
       message.error("Network error");
     } finally {
       setLoading(false);
@@ -50,12 +52,6 @@ const UsersPage: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const showEditModal = (user: any) => {
-    setActiveUser(user);
-    form.setFieldsValue(user);
-    setIsModalVisible(true);
-  };
 
   const showCreateModal = () => {
     setActiveUser(null);
@@ -68,23 +64,23 @@ const UsersPage: React.FC = () => {
       const values = await form.validateFields();
 
       const payload = {
-        full_name: values.full_name || "",
+        full_name: values.full_name,
+        phone: values.phone,
+        role: values.role,
         email: values.email || "",
-        business_name: values.business_name || "",
+        business_name: "",
         garage_name: "",
         business_type: "",
         garage_size: "",
-        brands_served: [],
-        vehicle_types: [],
         distributor_size: "",
-        brands_carried: [],
-        category_focus: [],
         pan_number: "",
         gstin: "",
-        phone: values.phone || "",
-        role: values.role || "",
+        brands_served: [],
+        vehicle_types: [],
+        brands_carried: [],
+        category_focus: [],
         location: {
-          city: values?.location?.city || "",
+          city: "",
           addressLine: "",
           state: "",
           pincode: "",
@@ -113,8 +109,8 @@ const UsersPage: React.FC = () => {
         setIsModalVisible(false);
         fetchUsers();
       } else {
-        message.error(data.detail || "❌ Operation failed");
         console.error("❌ Response error:", data);
+        message.error(data.detail || "❌ Operation failed");
       }
     } catch (err) {
       console.error(err);
@@ -152,7 +148,7 @@ const UsersPage: React.FC = () => {
         <Space>
           <Button
             icon={<EyeOutlined />}
-            onClick={() => window.location.href = `/users/${record._id}`}
+            onClick={() => navigate(`/users/${record._id}`)}
           />
         </Space>
       ),
@@ -209,23 +205,26 @@ const UsersPage: React.FC = () => {
         okText={activeUser ? "Update" : "Create"}
       >
         <Form layout="vertical" form={form}>
-          <Form.Item name="full_name" label="Full Name" rules={[{ required: true }]}>
+          <Form.Item
+            name="full_name"
+            label="Full Name"
+            rules={[{ required: true, message: "Name is required" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
+          <Form.Item
+            name="phone"
+            label="Phone"
+            rules={[{ required: true, message: "Phone number is required" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="business_name" label="Business Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: "Role is required" }]}
+          >
             <Input placeholder="admin | garage | vendor" />
-          </Form.Item>
-          <Form.Item name={["location", "city"]} label="City" rules={[{ required: true }]}>
-            <Input />
           </Form.Item>
         </Form>
       </Modal>

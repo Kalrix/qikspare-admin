@@ -1,4 +1,5 @@
-import { Refine } from "@refinedev/core";
+// src/App.tsx
+import { Refine, Authenticated } from "@refinedev/core";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import routerBindings from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
@@ -20,7 +21,7 @@ const API_BASE = import.meta.env.PROD
   : "http://127.0.0.1:8000";
 
 // ✅ Axios instance with token injection
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: API_BASE,
 });
 
@@ -50,14 +51,63 @@ function App() {
           ]}
         >
           <Routes>
-            <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/users/:id" element={<UserDetailPage />} />
-            <Route path="/sales/invoices" element={<InvoicesPage />} />
-            <Route path="/sales/create-invoice" element={<CreateInvoicePage />} />
-            <Route path="/sales/invoice/:id" element={<InvoiceViewPage />} />
+            <Route
+              path="/"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <DashboardPage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <DashboardPage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <UsersPage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/users/:id"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <UserDetailPage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/sales/invoices"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <InvoicesPage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/sales/create-invoice"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <CreateInvoicePage />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/sales/invoice/:id"
+              element={
+                <Authenticated fallback={<LoginPage />}>
+                  <InvoiceViewPage />
+                </Authenticated>
+              }
+            />
           </Routes>
         </Refine>
       </AntdApp>

@@ -168,6 +168,19 @@ const CreateInvoicePage = () => {
     }
   };
 
+  const renderPartyCard = (party: PartyOption | null, label: string) =>
+    party && (
+      <Card size="small" title={`${label} Info`} style={{ flex: 1 }}>
+        <p><b>Name:</b> {party.name}</p>
+        <p><b>Address:</b> {party.address}</p>
+        <p><b>Phone:</b> {party.phone}</p>
+        <p><b>Email:</b> {party.email}</p>
+        <p><b>GSTIN:</b> {party.gstin}</p>
+      </Card>
+    );
+
+  const summary = calculateTotal();
+
   const columns = [
     { title: "Part Name", render: (_: any, __: any, i: number) => <Input value={items[i]?.partName} onChange={e => handleItemChange(i, "partName", e.target.value)} /> },
     { title: "Model No.", render: (_: any, __: any, i: number) => <Input value={items[i]?.modelNo} onChange={e => handleItemChange(i, "modelNo", e.target.value)} /> },
@@ -193,17 +206,6 @@ const CreateInvoicePage = () => {
     }
   ];
 
-  const renderPartyCard = (party: PartyOption | null, label: string) =>
-    party && (
-      <Card size="small" title={`${label} Info`} style={{ width: 400, marginBottom: 16 }}>
-        <p><b>Name:</b> {party.name}</p>
-        <p><b>Address:</b> {party.address}</p>
-        <p><b>Phone:</b> {party.phone}</p>
-        <p><b>Email:</b> {party.email}</p>
-        <p><b>GSTIN:</b> {party.gstin}</p>
-      </Card>
-    );
-
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Topbar />
@@ -213,17 +215,7 @@ const CreateInvoicePage = () => {
           <Content>
             <Title level={3}>🧾 Create Invoice</Title>
 
-            <Card title="🔧 Spare Parts / Services">
-              <Table columns={columns} dataSource={items} pagination={false} rowKey={(record) => `${record.partName}-${record.modelNo}-${Math.random()}`} />
-              <Divider />
-              <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddItem}>
-                Add Item
-              </Button>
-            </Card>
-
-            <Divider />
-
-            <Space style={{ marginBottom: 12 }}>
+            <Space style={{ marginBottom: 16 }} wrap>
               <Select
                 value={selectedGarage?.value}
                 onChange={(val) => setSelectedGarage(garages.find(g => g.value === val) || null)}
@@ -246,44 +238,41 @@ const CreateInvoicePage = () => {
               />
             </Space>
 
-            {renderPartyCard(selectedGarage, "Buyer")}
-            {renderPartyCard(selectedVendor, "Seller")}
+            <Row gutter={16}>
+              <Col span={12}>{renderPartyCard(selectedGarage, "Buyer")}</Col>
+              <Col span={12}>{renderPartyCard(selectedVendor, "Seller")}</Col>
+            </Row>
 
-            <Row gutter={16} style={{ marginTop: 16 }}>
-              <Col>
-                <InputNumber
-                  value={deliveryCharge}
-                  addonBefore="Delivery Fee ₹"
-                  onChange={(v) => setDeliveryCharge(v || 0)}
-                />
+            <Card title="🔧 Spare Parts / Services" style={{ marginTop: 16 }}>
+              <Table columns={columns} dataSource={items} pagination={false} rowKey={(_, i) => i?.toString()} />
+              <Divider />
+              <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddItem}>
+                Add Item
+              </Button>
+            </Card>
+
+            <Row gutter={16} style={{ marginTop: 24 }}>
+              <Col span={6}>
+                <InputNumber value={deliveryCharge} addonBefore="Delivery Fee ₹" onChange={(v) => setDeliveryCharge(v || 0)} style={{ width: "100%" }} />
               </Col>
-              <Col>
-                <InputNumber
-                  value={platformFee}
-                  addonBefore="Platform Fee ₹"
-                  onChange={(v) => setPlatformFee(v || 0)}
-                />
+              <Col span={6}>
+                <InputNumber value={platformFee} addonBefore="Platform Fee ₹" onChange={(v) => setPlatformFee(v || 0)} style={{ width: "100%" }} />
+              </Col>
+              <Col span={12}>
+                <Card size="small" title="💰 Summary">
+                  <p><b>Subtotal:</b> ₹{summary.subtotal.toFixed(2)}</p>
+                  <p><b>Tax:</b> ₹{summary.tax.toFixed(2)}</p>
+                  <p><b>Grand Total:</b> ₹{summary.total.toFixed(2)}</p>
+                </Card>
               </Col>
             </Row>
 
             <Divider />
 
-            <Row gutter={12}>
-              <Col>
-                <Button icon={<SaveOutlined />} onClick={handleSaveInvoice} loading={loading}>
-                  Save
-                </Button>
-              </Col>
-              <Col>
-                <Button icon={<FilePdfOutlined />} onClick={() => handleDownload("customer")}>
-                  Download Customer PDF
-                </Button>
-              </Col>
-              <Col>
-                <Button icon={<FilePdfOutlined />} onClick={() => handleDownload("platform")}>
-                  Download Platform PDF
-                </Button>
-              </Col>
+            <Row gutter={16}>
+              <Col><Button icon={<SaveOutlined />} onClick={handleSaveInvoice} loading={loading}>Save</Button></Col>
+              <Col><Button icon={<FilePdfOutlined />} onClick={() => handleDownload("customer")}>Download Customer PDF</Button></Col>
+              <Col><Button icon={<FilePdfOutlined />} onClick={() => handleDownload("platform")}>Download Platform PDF</Button></Col>
             </Row>
           </Content>
         </Layout>

@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  Layout,
-  Button,
-  Descriptions,
-  Card,
-  Form,
-  Input,
-  Row,
-  Col,
-  Divider,
-  message,
+  Layout, Button, Descriptions, Card, Form, Input,
+  Row, Col, Divider, message
 } from "antd";
 import {
   ArrowLeftOutlined,
   EditOutlined,
-  SaveOutlined,
+  SaveOutlined
 } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import Topbar from "../dashboard/components/Topbar";
@@ -47,7 +39,6 @@ const UserDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: {
@@ -56,48 +47,48 @@ const UserDetailPage: React.FC = () => {
       });
 
       const data = await res.json();
-      if (res.ok) {
-        const found = data.users.find((u: User) => u._id === id);
-        if (!found) throw new Error("User not found");
-        setUser(found);
-        form.setFieldsValue(found);
-      } else {
-        throw new Error(data.detail || "Failed to fetch user");
-      }
-    } catch (err) {
+      if (!res.ok) throw new Error(data.detail || "Failed to fetch users");
+
+      const target = data.users.find((u: User) => u._id === id);
+      if (!target) throw new Error("User not found");
+
+      setUser(target);
+      form.setFieldsValue(target);
+    } catch (err: any) {
       console.error(err);
-      message.error("Error loading user");
+      message.error(err.message || "Error loading user");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (id) fetchUser();
+    if (id) {
+      setLoading(true);
+      fetchUser();
+    }
   }, [id]);
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
 
-      const fieldsToSend = [
-        "full_name", "email", "business_name", "garage_name",
-        "business_type", "garage_size", "brands_served", "vehicle_types",
-        "distributor_size", "brands_carried", "category_focus",
-        "pan_number", "gstin", "location", "phone", "role",
+      const payload: Record<string, any> = {};
+      const fields = [
+        "full_name", "email", "business_name", "garage_name", "business_type",
+        "garage_size", "brands_served", "vehicle_types", "distributor_size",
+        "brands_carried", "category_focus", "pan_number", "gstin", "phone", "role", "location"
       ];
 
-      const payload: any = {};
-
-      for (const key of fieldsToSend) {
-        const value = values[key];
+      for (const key of fields) {
         if (key === "location") {
+          const loc = values.location || {};
           const cleaned = Object.fromEntries(
-            Object.entries(value || {}).filter(([_, v]) => v !== "")
+            Object.entries(loc).filter(([_, v]) => v !== undefined && v !== "")
           );
           payload.location = Object.keys(cleaned).length ? cleaned : null;
         } else {
-          payload[key] = value !== "" ? value : null;
+          payload[key] = values[key] !== "" ? values[key] : null;
         }
       }
 
@@ -112,16 +103,15 @@ const UserDetailPage: React.FC = () => {
 
       const data = await res.json();
       if (res.ok) {
-        message.success("✅ User updated successfully");
+        message.success("✅ User updated");
         setEditMode(false);
         fetchUser();
       } else {
-        console.error("❌ Update error:", data);
-        message.error(data.detail || "Failed to update user");
+        throw new Error(data.detail || "Update failed");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      message.error("Form validation failed");
+      message.error(err.message || "Form validation failed");
     }
   };
 
@@ -146,11 +136,19 @@ const UserDetailPage: React.FC = () => {
                   title="User Information"
                   extra={
                     editMode ? (
-                      <Button icon={<SaveOutlined />} type="primary" onClick={handleSave}>
+                      <Button
+                        icon={<SaveOutlined />}
+                        type="primary"
+                        onClick={handleSave}
+                        loading={loading}
+                      >
                         Save
                       </Button>
                     ) : (
-                      <Button icon={<EditOutlined />} onClick={() => setEditMode(true)}>
+                      <Button
+                        icon={<EditOutlined />}
+                        onClick={() => setEditMode(true)}
+                      >
                         Edit
                       </Button>
                     )
@@ -170,16 +168,16 @@ const UserDetailPage: React.FC = () => {
                         ["gstin", "GSTIN"],
                         ["pan_number", "PAN Number"],
                         ["role", "Role", true],
-                      ].map(([key, label, disabled]) => (
+                      ].map(([key, label, isDisabled]) => (
                         <Col span={12} key={key as string}>
                           <Form.Item name={key as string} label={label as string}>
-                            <Input disabled={!!disabled} />
+                            <Input disabled={!!isDisabled} />
                           </Form.Item>
                         </Col>
                       ))}
                     </Row>
 
-                    <Divider style={{ margin: "12px 0" }} />
+                    <Divider />
 
                     <Row gutter={16}>
                       <Col span={12}>
@@ -234,6 +232,7 @@ const UserDetailPage: React.FC = () => {
             </Row>
 
             <Divider />
+
             <Card title="Sales Pipeline (Coming Soon)">
               <p>This section will track onboarding, KYC, purchases, issues, and conversions.</p>
             </Card>

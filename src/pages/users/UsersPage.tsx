@@ -68,21 +68,27 @@ const UsersPage: React.FC = () => {
       const values = await form.validateFields();
 
       const payload = {
-        ...values,
-        location: {
-          city: values?.location?.city || "",
-          addressLine: values?.location?.addressLine || "",
-          state: values?.location?.state || "",
-          pincode: values?.location?.pincode || "",
-        },
+        full_name: values.full_name || "",
+        email: values.email || "",
+        business_name: values.business_name || "",
+        garage_name: "",
+        business_type: "",
+        garage_size: "",
         brands_served: [],
         vehicle_types: [],
+        distributor_size: "",
         brands_carried: [],
         category_focus: [],
-        business_type: "",
-        distributor_size: "",
-        garage_size: "",
         pan_number: "",
+        gstin: "",
+        phone: values.phone || "",
+        role: values.role || "",
+        location: {
+          city: values?.location?.city || "",
+          addressLine: "",
+          state: "",
+          pincode: "",
+        },
       };
 
       const url = activeUser
@@ -111,6 +117,7 @@ const UsersPage: React.FC = () => {
         console.error("❌ Response error:", data);
       }
     } catch (err) {
+      console.error(err);
       message.error("Please fill form correctly");
     }
   };
@@ -208,16 +215,16 @@ const UsersPage: React.FC = () => {
           <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email">
+          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="business_name" label="Business Name">
+          <Form.Item name="business_name" label="Business Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item name="role" label="Role" rules={[{ required: true }]}>
             <Input placeholder="admin | garage | vendor" />
           </Form.Item>
-          <Form.Item name={["location", "city"]} label="City">
+          <Form.Item name={["location", "city"]} label="City" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         </Form>

@@ -21,7 +21,6 @@ import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import { API_BASE_URL } from "../../config";
 
-
 const { Content, Sider } = Layout;
 
 interface User {
@@ -50,7 +49,7 @@ const UserDetailPage: React.FC = () => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await fetch("${API_BASE_URL}/api/admin/users", {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -63,9 +62,10 @@ const UserDetailPage: React.FC = () => {
         setUser(found);
         form.setFieldsValue(found);
       } else {
-        message.error(data.detail || "Failed to fetch user");
+        throw new Error(data.detail || "Failed to fetch user");
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       message.error("Error loading user");
     } finally {
       setLoading(false);
@@ -73,34 +73,33 @@ const UserDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchUser();
+    if (id) fetchUser();
   }, [id]);
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
 
-      const payload: any = {};
       const fieldsToSend = [
         "full_name", "email", "business_name", "garage_name",
         "business_type", "garage_size", "brands_served", "vehicle_types",
         "distributor_size", "brands_carried", "category_focus",
-        "pan_number", "gstin", "location", "phone", "role"
+        "pan_number", "gstin", "location", "phone", "role",
       ];
 
-      fieldsToSend.forEach((key) => {
+      const payload: any = {};
+
+      for (const key of fieldsToSend) {
         const value = values[key];
         if (key === "location") {
-          const cleanedLoc = Object.fromEntries(
-            Object.entries(value || {}).filter(([_, v]) => v !== undefined && v !== "")
+          const cleaned = Object.fromEntries(
+            Object.entries(value || {}).filter(([_, v]) => v !== "")
           );
-          payload.location = Object.keys(cleanedLoc).length ? cleanedLoc : null;
-        } else if (Array.isArray(value)) {
-          payload[key] = value.length ? value : null;
+          payload.location = Object.keys(cleaned).length ? cleaned : null;
         } else {
-          payload[key] = value !== undefined && value !== "" ? value : null;
+          payload[key] = value !== "" ? value : null;
         }
-      });
+      }
 
       const res = await fetch(`${API_BASE_URL}/api/admin/update-user/${id}`, {
         method: "PATCH",
@@ -112,18 +111,17 @@ const UserDetailPage: React.FC = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        message.success("✅ User updated");
+        message.success("✅ User updated successfully");
         setEditMode(false);
         fetchUser();
       } else {
-        console.error("❌ Update failed:", data);
-        message.error(data.detail || "Update failed");
+        console.error("❌ Update error:", data);
+        message.error(data.detail || "Failed to update user");
       }
     } catch (err) {
-      console.error("⚠️ Form error:", err);
-      message.error("Validation failed");
+      console.error(err);
+      message.error("Form validation failed");
     }
   };
 
@@ -131,9 +129,7 @@ const UserDetailPage: React.FC = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <Topbar />
       <Layout>
-        <Sider width={220}>
-          <Sidebar />
-        </Sider>
+        <Sider width={220}><Sidebar /></Sider>
         <Layout style={{ padding: 24 }}>
           <Content style={{ background: "#fff", padding: 24 }}>
             <Button
@@ -175,7 +171,7 @@ const UserDetailPage: React.FC = () => {
                         ["pan_number", "PAN Number"],
                         ["role", "Role", true],
                       ].map(([key, label, disabled]) => (
-                        <Col span={12} key={String(key)}>
+                        <Col span={12} key={key as string}>
                           <Form.Item name={key as string} label={label as string}>
                             <Input disabled={!!disabled} />
                           </Form.Item>
@@ -215,13 +211,13 @@ const UserDetailPage: React.FC = () => {
                 <Card title="Referral & Metadata">
                   <Descriptions column={1}>
                     <Descriptions.Item label="Referral Code">
-                      {typeof user?.referral_code === "string" ? user.referral_code : "N/A"}
+                      {user?.referral_code || "N/A"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Referred By">
-                      {typeof user?.referred_by === "string" ? user.referred_by : "N/A"}
+                      {user?.referred_by || "N/A"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Referral Count">
-                      {typeof user?.referral_count === "number" ? user.referral_count : 0}
+                      {user?.referral_count ?? 0}
                     </Descriptions.Item>
                     <Descriptions.Item label="KYC Status">
                       {user?.kyc_status || "N/A"}
@@ -238,7 +234,6 @@ const UserDetailPage: React.FC = () => {
             </Row>
 
             <Divider />
-
             <Card title="Sales Pipeline (Coming Soon)">
               <p>This section will track onboarding, KYC, purchases, issues, and conversions.</p>
             </Card>

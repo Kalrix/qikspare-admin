@@ -1,24 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  Layout,
-  Tabs,
-  Table,
-  Tag,
-  message,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
+  Layout, Tabs, Table, Tag, message, Button,
+  Modal, Form, Input, Space,
 } from "antd";
-import {
-  EyeOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import { API_BASE_URL } from "../../config";
-
 
 const { Content, Sider } = Layout;
 const { TabPane } = Tabs;
@@ -30,31 +18,31 @@ const UsersPage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch("${API_BASE_URL}/api/admin/users", {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
       const data = await res.json();
       if (res.ok) {
         setUsers(data.users || []);
       } else {
-        message.error(data.detail || "Failed to fetch users");
+        throw new Error(data.detail || "Unable to fetch users");
       }
-    } catch (err) {
-      message.error("Network error");
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to fetch users");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const showEditModal = (user: any) => {
     setActiveUser(user);
@@ -71,26 +59,14 @@ const UsersPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const expectedFields = [
-        "full_name", "email", "business_name", "garage_name",
-        "business_type", "garage_size", "brands_served", "vehicle_types",
-        "distributor_size", "brands_carried", "category_focus",
-        "pan_number", "gstin", "location", "phone", "role"
-      ];
-
-      const payload: any = {};
-      for (const field of expectedFields) {
-        if (field === "location") {
-          const loc = values.location || {};
-          payload.location = Object.keys(loc).length > 0 ? loc : null;
-        } else {
-          payload[field] = values[field] || null;
-        }
-      }
+      const payload = {
+        ...values,
+        location: values.location || {},
+      };
 
       const url = activeUser
         ? `${API_BASE_URL}/api/admin/update-user/${activeUser._id}`
-        : `${API_BASE_URL}/api/admin/create-user`; // 🔁 Replace with actual endpoint
+        : `${API_BASE_URL}/api/admin/create-user`;
 
       const method = activeUser ? "PATCH" : "POST";
 
@@ -104,20 +80,16 @@ const UsersPage: React.FC = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        message.success(
-          activeUser ? "✅ User updated successfully" : "✅ User created successfully"
-        );
+        message.success(activeUser ? "User updated" : "User created");
         setIsModalVisible(false);
         fetchUsers();
       } else {
-        console.error("❌ Failed:", data);
-        message.error(data.detail || "Operation failed");
+        throw new Error(data.detail || "Operation failed");
       }
-    } catch (err) {
-      console.error("Form validation error:", err);
-      message.error("Please fill form correctly");
+    } catch (error) {
+      console.error(error);
+      message.error("Submission failed");
     }
   };
 
@@ -128,21 +100,16 @@ const UsersPage: React.FC = () => {
     { title: "Business", dataIndex: "business_name", key: "business" },
     {
       title: "City",
-      dataIndex: ["location", "city"],
       key: "city",
       render: (_: any, record: any) => record.location?.city || "N/A",
     },
     {
       title: "Role",
-      dataIndex: "role",
       key: "role",
+      dataIndex: "role",
       render: (role: string) => {
-        const colorMap: Record<string, string> = {
-          admin: "red",
-          garage: "blue",
-          vendor: "green",
-        };
-        return <Tag color={colorMap[role] || "default"}>{role?.toUpperCase()}</Tag>;
+        const colors: any = { admin: "red", garage: "blue", vendor: "green" };
+        return <Tag color={colors[role] || "default"}>{role.toUpperCase()}</Tag>;
       },
     },
     {
@@ -173,9 +140,7 @@ const UsersPage: React.FC = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <Topbar />
       <Layout>
-        <Sider width={220}>
-          <Sidebar />
-        </Sider>
+        <Sider width={220}><Sidebar /></Sider>
         <Layout style={{ padding: "0 24px" }}>
           <Content style={{ background: "#fff", marginTop: 16 }}>
             <div style={{ padding: 16 }}>
@@ -186,15 +151,9 @@ const UsersPage: React.FC = () => {
                 </Button>
               </div>
               <Tabs defaultActiveKey="admin" type="card">
-                <TabPane tab="Admins" key="admin">
-                  {renderTab("admin")}
-                </TabPane>
-                <TabPane tab="Garages" key="garage">
-                  {renderTab("garage")}
-                </TabPane>
-                <TabPane tab="Vendors" key="vendor">
-                  {renderTab("vendor")}
-                </TabPane>
+                <TabPane tab="Admins" key="admin">{renderTab("admin")}</TabPane>
+                <TabPane tab="Garages" key="garage">{renderTab("garage")}</TabPane>
+                <TabPane tab="Vendors" key="vendor">{renderTab("vendor")}</TabPane>
               </Tabs>
             </div>
           </Content>

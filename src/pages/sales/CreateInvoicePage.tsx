@@ -74,10 +74,12 @@ const CreateInvoicePage = () => {
     setItems([
       ...items,
       {
+        id: Date.now().toString(), // unique and stable
         partName: "", modelNo: "", category: "", unitPrice: 0,
         quantity: 1, discountAmount: 0, discountPercent: 0, gst: 18,
       },
     ]);
+  
 
   const handleRemoveItem = (i: number) => {
     const updated = [...items];
@@ -244,7 +246,12 @@ const CreateInvoicePage = () => {
             </Row>
 
             <Card title="🔧 Spare Parts / Services" style={{ marginTop: 16 }}>
-            <Table columns={columns} dataSource={items} pagination={false} rowKey={(_, index) => index.toString()} />
+            <Table
+  columns={columns}
+  dataSource={items}
+  pagination={false}
+  rowKey={(record) => record.id}
+/>
 
               <Divider />
               <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddItem}>

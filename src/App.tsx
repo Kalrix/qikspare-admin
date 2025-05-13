@@ -20,7 +20,6 @@ const API_BASE = import.meta.env.PROD
   ? "https://qikspare-api.onrender.com"
   : "http://127.0.0.1:8000";
 
-// ✅ Axios instance with token injection
 export const axiosInstance = axios.create({
   baseURL: API_BASE,
 });
@@ -52,10 +51,15 @@ function App() {
         >
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+
             <Route
               path="/"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="home"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <DashboardPage />
                 </Authenticated>
               }
@@ -63,7 +67,11 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="dashboard"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <DashboardPage />
                 </Authenticated>
               }
@@ -71,7 +79,11 @@ function App() {
             <Route
               path="/users"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="users"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <UsersPage />
                 </Authenticated>
               }
@@ -79,7 +91,11 @@ function App() {
             <Route
               path="/users/:id"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="user-detail"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <UserDetailPage />
                 </Authenticated>
               }
@@ -87,7 +103,11 @@ function App() {
             <Route
               path="/sales/invoices"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="invoices"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <InvoicesPage />
                 </Authenticated>
               }
@@ -95,7 +115,11 @@ function App() {
             <Route
               path="/sales/create-invoice"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="create-invoice"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <CreateInvoicePage />
                 </Authenticated>
               }
@@ -103,7 +127,11 @@ function App() {
             <Route
               path="/sales/invoice/:id"
               element={
-                <Authenticated fallback={<LoginPage />}>
+                <Authenticated
+                  key="invoice-detail"
+                  fallback={<LoginPage />}
+                  v3LegacyAuthProviderCompatible
+                >
                   <InvoiceViewPage />
                 </Authenticated>
               }

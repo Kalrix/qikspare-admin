@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
-  Layout, Tabs, Table, Tag, message, Button,
-  Modal, Form, Input, Space,
+  Layout,
+  Tabs,
+  Table,
+  Tag,
+  message,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Space,
 } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import Topbar from "../dashboard/components/Topbar";
@@ -18,10 +26,6 @@ const UsersPage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -34,15 +38,18 @@ const UsersPage: React.FC = () => {
       if (res.ok) {
         setUsers(data.users || []);
       } else {
-        throw new Error(data.detail || "Unable to fetch users");
+        message.error(data.detail || "Failed to fetch users");
       }
-    } catch (error) {
-      console.error(error);
-      message.error("Failed to fetch users");
+    } catch (err) {
+      message.error("Network error");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const showEditModal = (user: any) => {
     setActiveUser(user);
@@ -59,9 +66,23 @@ const UsersPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
       const payload = {
         ...values,
-        location: values.location || {},
+        location: {
+          city: values?.location?.city || "",
+          addressLine: values?.location?.addressLine || "",
+          state: values?.location?.state || "",
+          pincode: values?.location?.pincode || "",
+        },
+        brands_served: [],
+        vehicle_types: [],
+        brands_carried: [],
+        category_focus: [],
+        business_type: "",
+        distributor_size: "",
+        garage_size: "",
+        pan_number: "",
       };
 
       const url = activeUser
@@ -80,16 +101,17 @@ const UsersPage: React.FC = () => {
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        message.success(activeUser ? "User updated" : "User created");
+        message.success(activeUser ? "✅ User updated" : "✅ User created");
         setIsModalVisible(false);
         fetchUsers();
       } else {
-        throw new Error(data.detail || "Operation failed");
+        message.error(data.detail || "❌ Operation failed");
+        console.error("❌ Response error:", data);
       }
-    } catch (error) {
-      console.error(error);
-      message.error("Submission failed");
+    } catch (err) {
+      message.error("Please fill form correctly");
     }
   };
 
@@ -101,15 +123,19 @@ const UsersPage: React.FC = () => {
     {
       title: "City",
       key: "city",
-      render: (_: any, record: any) => record.location?.city || "N/A",
+      render: (_: any, record: any) => record?.location?.city || "N/A",
     },
     {
       title: "Role",
-      key: "role",
       dataIndex: "role",
+      key: "role",
       render: (role: string) => {
-        const colors: any = { admin: "red", garage: "blue", vendor: "green" };
-        return <Tag color={colors[role] || "default"}>{role.toUpperCase()}</Tag>;
+        const colorMap: Record<string, string> = {
+          admin: "red",
+          garage: "blue",
+          vendor: "green",
+        };
+        return <Tag color={colorMap[role] || "default"}>{role?.toUpperCase()}</Tag>;
       },
     },
     {
@@ -140,7 +166,9 @@ const UsersPage: React.FC = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <Topbar />
       <Layout>
-        <Sider width={220}><Sidebar /></Sider>
+        <Sider width={220}>
+          <Sidebar />
+        </Sider>
         <Layout style={{ padding: "0 24px" }}>
           <Content style={{ background: "#fff", marginTop: 16 }}>
             <div style={{ padding: 16 }}>
@@ -151,9 +179,15 @@ const UsersPage: React.FC = () => {
                 </Button>
               </div>
               <Tabs defaultActiveKey="admin" type="card">
-                <TabPane tab="Admins" key="admin">{renderTab("admin")}</TabPane>
-                <TabPane tab="Garages" key="garage">{renderTab("garage")}</TabPane>
-                <TabPane tab="Vendors" key="vendor">{renderTab("vendor")}</TabPane>
+                <TabPane tab="Admins" key="admin">
+                  {renderTab("admin")}
+                </TabPane>
+                <TabPane tab="Garages" key="garage">
+                  {renderTab("garage")}
+                </TabPane>
+                <TabPane tab="Vendors" key="vendor">
+                  {renderTab("vendor")}
+                </TabPane>
               </Tabs>
             </div>
           </Content>

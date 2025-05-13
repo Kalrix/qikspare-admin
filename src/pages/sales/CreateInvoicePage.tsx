@@ -244,7 +244,8 @@ const CreateInvoicePage = () => {
             </Row>
 
             <Card title="🔧 Spare Parts / Services" style={{ marginTop: 16 }}>
-              <Table columns={columns} dataSource={items} pagination={false} rowKey={(record) => `${record.partName}-${record.modelNo}-${Math.random()}`} />
+            <Table columns={columns} dataSource={items} pagination={false} rowKey={(_, index) => index.toString()} />
+
               <Divider />
               <Button block icon={<PlusOutlined />} type="dashed" onClick={handleAddItem}>
                 Add Item

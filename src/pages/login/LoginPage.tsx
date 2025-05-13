@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useLogin } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+import axios from "axios";
 import "../../styles/login.css";
-import { API_BASE_URL, axiosInstance } from "../../config"; // ✅ Axios instance with auth
+import { API_BASE_URL } from "../../config";
 
 const quotes = [
   "Speed is everything. Quality is the key.",
@@ -25,6 +26,13 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const quote = quotes[new Date().getDay()];
 
+  const axiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
   const requestOtp = async () => {
     if (!/^\d{10}$/.test(phone)) {
       return message.error("Enter a valid 10-digit phone number");
@@ -33,8 +41,10 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await axiosInstance.post("/api/auth/request-otp", { phone });
-      setStep(2);
-      message.success("OTP sent!");
+      if (res.status === 200) {
+        setStep(2);
+        message.success("OTP sent!");
+      }
     } catch (err: any) {
       message.error(err?.response?.data?.detail || "Failed to send OTP.");
     } finally {
@@ -73,7 +83,6 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="login-container">
-      {/* Left Panel */}
       <div className="left-panel">
         <div className="login-card">
           <h2>Welcome back 👋</h2>
@@ -114,7 +123,6 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Panel */}
       <div className="right-panel">
         <div className="branding-content glass-card">
           <img src="/qikspare-logo.png" alt="QikSpare" className="branding-logo" />

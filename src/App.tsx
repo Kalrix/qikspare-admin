@@ -12,8 +12,26 @@ import InvoicesPage from "./pages/sales/InvoicesPage";
 import InvoiceViewPage from "./pages/sales/InvoiceViewPage";
 
 import { authProvider } from "./authProvider";
-import dataProvider from "@refinedev/simple-rest";
-import "@refinedev/antd/dist/reset.css";
+import dataProviderFactory from "@refinedev/simple-rest";
+
+const API_BASE = import.meta.env.PROD
+  ? "https://qikspare-api.onrender.com"
+  : "http://127.0.0.1:8000";
+
+// ✅ Custom fetch to inject token
+const customFetch = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem("token");
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: token ? `Bearer ${token}` : "",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const dataProvider = dataProviderFactory(API_BASE, customFetch);
 
 function App() {
   return (
@@ -22,12 +40,12 @@ function App() {
         <Refine
           routerProvider={routerBindings}
           authProvider={authProvider}
-          dataProvider={dataProvider("http://127.0.0.1:8000")}
+          dataProvider={dataProvider}
           LoginPage={LoginPage}
           resources={[
             { name: "dashboard", list: "/dashboard" },
             { name: "users", list: "/users" },
-            { name: "sales", list: "/sales/invoices" }, // Grouping sales-related routes
+            { name: "sales", list: "/sales/invoices" },
           ]}
         >
           <Routes>

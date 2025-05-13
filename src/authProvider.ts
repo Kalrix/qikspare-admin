@@ -20,10 +20,15 @@ export const authProvider: AuthProvider = {
 
   getPermissions: async () => null,
 
-  getIdentity: async () => ({
-    name: "Admin",
-    avatar: "",
-  }),
+  getIdentity: async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    return {
+      name: "Admin", // Or fetch /me from backend
+      avatar: "",    // Optional
+    };
+  },
 
   onError: async (error) => {
     console.error("Auth Error:", error);

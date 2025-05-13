@@ -14,7 +14,7 @@ import { generateInvoiceHTML } from "../../components/invoice/generateInvoiceHtm
 import { API_BASE_URL } from "../../config";
 
 const { Content, Sider } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const paymentModes = ["UPI", "Cash", "Card", "NetBanking", "Wallet"];
 
 type PartyOption = {
@@ -28,7 +28,6 @@ type PartyOption = {
 };
 
 const CreateInvoicePage = () => {
-  const [form] = Form.useForm();
   const [items, setItems] = useState<any[]>([]);
   const [deliveryCharge, setDeliveryCharge] = useState<number>(100);
   const [platformFee, setPlatformFee] = useState<number>(299);
@@ -43,7 +42,7 @@ const CreateInvoicePage = () => {
     axios.get(`${API_BASE_URL}/api/admin/users`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }).then(res => {
-      const allUsers: any[] = res.data.users || [];
+      const users: any[] = res.data.users || [];
 
       const formatAddress = (location: any) => {
         if (!location) return "";
@@ -51,33 +50,18 @@ const CreateInvoicePage = () => {
         return [addressLine, city, state, pincode].filter(Boolean).join(", ");
       };
 
-      setGarages(
-        allUsers
-          .filter((u: any) => u.role === "garage")
-          .map((u: any) => ({
-            label: u.full_name || u.username,
-            value: u._id,
-            address: formatAddress(u.location),
-            phone: u.phone,
-            email: u.email,
-            gstin: u.gstin || "",
-            name: u.full_name || u.username,
-          }))
-      );
+      const formatUser = (u: any): PartyOption => ({
+        label: u.full_name || u.username,
+        value: u._id,
+        address: formatAddress(u.location),
+        phone: u.phone,
+        email: u.email,
+        gstin: u.gstin || "",
+        name: u.full_name || u.username,
+      });
 
-      setVendors(
-        allUsers
-          .filter((u: any) => u.role === "vendor")
-          .map((u: any) => ({
-            label: u.full_name || u.username,
-            value: u._id,
-            address: formatAddress(u.location),
-            phone: u.phone,
-            email: u.email,
-            gstin: u.gstin || "",
-            name: u.full_name || u.username,
-          }))
-      );
+      setGarages(users.filter(u => u.role === "garage").map(formatUser));
+      setVendors(users.filter(u => u.role === "vendor").map(formatUser));
     }).catch(() => message.error("Failed to fetch users."));
   }, []);
 
@@ -123,7 +107,8 @@ const CreateInvoicePage = () => {
       subtotal += discounted;
       tax += gstAmount;
     }
-    return { subtotal, tax, total: subtotal + tax + deliveryCharge };
+    const total = subtotal + tax + deliveryCharge + platformFee;
+    return { subtotal, tax, total };
   };
 
   const handleDownloadInvoice = async (type: "customer" | "platform") => {
@@ -132,7 +117,8 @@ const CreateInvoicePage = () => {
     }
 
     const invoiceDate = new Date().toISOString().split("T")[0];
-    const total = calculateTotal().total;
+    const { total } = calculateTotal();
+
     const payload = {
       invoiceType: type,
       buyer: selectedGarage,
@@ -201,105 +187,18 @@ const CreateInvoicePage = () => {
     }
   };
 
-  const columns = [
-    {
-      title: "Part Name",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <Input
-            value={items[i]?.partName}
-            onChange={(e) => handleItemChange(i, "partName", e.target.value)}
-          />
-        ),
-    },
-    {
-      title: "Model No.",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <Input
-            value={items[i]?.modelNo}
-            onChange={(e) => handleItemChange(i, "modelNo", e.target.value)}
-          />
-        ),
-    },
-    {
-      title: "Category",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <Input
-            value={items[i]?.category}
-            onChange={(e) => handleItemChange(i, "category", e.target.value)}
-          />
-        ),
-    },
-    {
-      title: "Unit Price",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <InputNumber
-            value={items[i]?.unitPrice}
-            onChange={(v) => handleItemChange(i, "unitPrice", v ?? 0)}
-          />
-        ),
-    },
-    {
-      title: "Qty",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <InputNumber
-            value={items[i]?.quantity}
-            onChange={(v) => handleItemChange(i, "quantity", v ?? 1)}
-          />
-        ),
-    },
-    {
-      title: "₹ Discount",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <InputNumber
-            value={items[i]?.discountAmount}
-            onChange={(v) => handleItemChange(i, "discountAmount", v ?? 0)}
-          />
-        ),
-    },
-    {
-      title: "% Discount",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <InputNumber
-            value={items[i]?.discountPercent}
-            onChange={(v) => handleItemChange(i, "discountPercent", v ?? 0)}
-          />
-        ),
-    },
-    {
-      title: "GST %",
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <InputNumber
-            value={items[i]?.gst}
-            onChange={(v) => handleItemChange(i, "gst", v ?? 0)}
-          />
-        ),
-    },
-    {
-      title: "Total",
-      render: (_: any, __: any, i: number | undefined) => {
-        if (i === undefined) return null;
-        const it = items[i];
-        const base = it.unitPrice * it.quantity;
-        const discounted = base - it.discountAmount;
-        const gst = (discounted * it.gst) / 100;
-        return `₹${(discounted + gst).toFixed(2)}`;
-      },
-    },
-    {
-      render: (_: any, __: any, i: number | undefined) =>
-        i !== undefined && (
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleRemoveItem(i)} />
-        ),
-    },
-  ];
+  const renderPartyInfo = (party: PartyOption | null, label: string) =>
+    party && (
+      <div style={{ marginBottom: 12 }}>
+        <Card size="small" title={`${label} Info`} style={{ width: 400 }}>
+          <p><b>Name:</b> {party.name}</p>
+          <p><b>Address:</b> {party.address}</p>
+          <p><b>Phone:</b> {party.phone}</p>
+          <p><b>Email:</b> {party.email}</p>
+          <p><b>GSTIN:</b> {party.gstin}</p>
+        </Card>
+      </div>
+    );
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -348,7 +247,29 @@ const CreateInvoicePage = () => {
               />
             </Space>
 
-            <Row gutter={12} style={{ marginTop: 12 }}>
+            {renderPartyInfo(selectedGarage, "Buyer")}
+            {renderPartyInfo(selectedVendor, "Seller")}
+
+            <Row gutter={16} style={{ margin: "16px 0" }}>
+              <Col>
+                <InputNumber
+                  value={deliveryCharge}
+                  addonBefore="Delivery Fee ₹"
+                  onChange={(v) => setDeliveryCharge(v || 0)}
+                />
+              </Col>
+              <Col>
+                <InputNumber
+                  value={platformFee}
+                  addonBefore="Platform Fee ₹"
+                  onChange={(v) => setPlatformFee(v || 0)}
+                />
+              </Col>
+            </Row>
+
+            <Divider />
+
+            <Row gutter={12}>
               <Col>
                 <Button icon={<SaveOutlined />} onClick={handleSaveInvoice} loading={loading}>
                   Save

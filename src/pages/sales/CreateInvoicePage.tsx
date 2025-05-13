@@ -16,6 +16,11 @@ import { API_BASE_URL } from "../../config";
 const { Content, Sider } = Layout;
 const { Title } = Typography;
 const paymentModes = ["UPI", "Cash", "Card", "NetBanking", "Wallet"];
+const partCategories = [
+  "Brake", "Engine", "Suspension", "Filter", "Battery", "Tyre",
+  "Oil", "Lights", "Exhaust", "AC", "Electrical", "Body"
+];
+
 
 type PartyOption = {
   label: string;
@@ -186,7 +191,17 @@ const CreateInvoicePage = () => {
   const columns = [
     { title: "Part Name", render: (_: any, __: any, i: number) => <Input value={items[i]?.partName} onChange={e => handleItemChange(i, "partName", e.target.value)} /> },
     { title: "Model No.", render: (_: any, __: any, i: number) => <Input value={items[i]?.modelNo} onChange={e => handleItemChange(i, "modelNo", e.target.value)} /> },
-    { title: "Category", render: (_: any, __: any, i: number) => <Input value={items[i]?.category} onChange={e => handleItemChange(i, "category", e.target.value)} /> },
+    { title: "Category", render: (_: any, __: any, i: number) => (
+      <Select
+        value={items[i]?.category}
+        onChange={(value) => handleItemChange(i, "category", value)}
+        style={{ width: "100%" }}
+        options={partCategories.map(c => ({ label: c, value: c }))}
+        placeholder="Select Category"
+        showSearch
+      />
+    )},
+    
     { title: "Unit Price", render: (_: any, __: any, i: number) => <InputNumber value={items[i]?.unitPrice} onChange={v => handleItemChange(i, "unitPrice", v || 0)} /> },
     { title: "Qty", render: (_: any, __: any, i: number) => <InputNumber value={items[i]?.quantity} onChange={v => handleItemChange(i, "quantity", v || 1)} /> },
     { title: "₹ Discount", render: (_: any, __: any, i: number) => <InputNumber value={items[i]?.discountAmount} onChange={v => handleItemChange(i, "discountAmount", v || 0)} /> },

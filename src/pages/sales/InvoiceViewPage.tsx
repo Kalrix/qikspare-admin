@@ -10,6 +10,8 @@ import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import html2pdf from "html2pdf.js";
 import { generateInvoiceHTML } from "../../components/invoice/generateInvoiceHtml";
+import { API_BASE_URL } from "../../config";
+
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -25,7 +27,7 @@ const InvoiceDetailPage = () => {
 
   const fetchInvoice = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/invoices/api/invoices/${id}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/invoices/api/invoices/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setInvoice(res.data);
@@ -170,7 +172,7 @@ const InvoiceDetailPage = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      await axios.patch(`http://localhost:8000/api/invoices/api/invoices/update/${id}`, {
+      await axios.patch(`${API_BASE_URL}/api/invoices/api/invoices/update/${id}`, {
         ...invoice,
         subTotal,
         totalTax,

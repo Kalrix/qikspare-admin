@@ -19,6 +19,8 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
+import { API_BASE_URL } from "../../config";
+
 
 const { Content, Sider } = Layout;
 
@@ -48,7 +50,7 @@ const UserDetailPage: React.FC = () => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/admin/users", {
+      const res = await fetch("${API_BASE_URL}/api/admin/users", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -100,7 +102,7 @@ const UserDetailPage: React.FC = () => {
         }
       });
 
-      const res = await fetch(`http://localhost:8000/api/admin/update-user/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/update-user/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

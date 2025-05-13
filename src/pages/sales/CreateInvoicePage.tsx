@@ -12,6 +12,8 @@ import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
 import html2pdf from "html2pdf.js";
 import { generateInvoiceHTML } from "../../components/invoice/generateInvoiceHtml";
+import { API_BASE_URL } from "../../config";
+
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -40,7 +42,7 @@ const CreateInvoicePage = () => {
   const [vendors, setVendors] = useState<PartyOption[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/api/admin/users", {
+    axios.get("${API_BASE_URL}/api/admin/users", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }).then(res => {
       const allUsers: any[] = res.data.users || [];
@@ -169,7 +171,7 @@ const CreateInvoicePage = () => {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:8000/api/invoices/api/invoices/create", payload, {
+      await axios.post("${API_BASE_URL}/api/invoices/api/invoices/create", payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       message.success("Invoice saved successfully.");

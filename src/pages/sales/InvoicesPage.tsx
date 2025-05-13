@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
+import { API_BASE_URL } from "../../config";
+
 
 dayjs.extend(isBetween);
 
@@ -33,7 +35,7 @@ const InvoicesPage = () => {
 
   const fetchInvoices = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/invoices/api/invoices/list", {
+      const res = await axios.get("${API_BASE_URL}/api/invoices/api/invoices/list", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       const data = res.data || [];
@@ -47,7 +49,7 @@ const InvoicesPage = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8000/api/invoices/api/invoices/delete/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/invoices/api/invoices/delete/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       message.success("Invoice deleted");

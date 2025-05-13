@@ -3,6 +3,10 @@ import { useLogin } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import "../../styles/login.css";
+import { API_BASE_URL } from "../../config";
+
+await axios.get(`${API_BASE_URL}/api/...`)
+
 
 const quotes = [
   "Speed is everything. Quality is the key.",
@@ -23,7 +27,7 @@ const LoginPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const quote = quotes[new Date().getDay()];
-  const API_BASE = "http://localhost:8000/api/auth";
+  const API_BASE = "${API_BASE_URL}/api/auth";
 
   const requestOtp = async () => {
     if (!/^\d{10}$/.test(phone)) {

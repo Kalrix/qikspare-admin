@@ -17,6 +17,8 @@ import {
 } from "@ant-design/icons";
 import Topbar from "../dashboard/components/Topbar";
 import Sidebar from "../dashboard/components/Sidebar";
+import { API_BASE_URL } from "../../config";
+
 
 const { Content, Sider } = Layout;
 const { TabPane } = Tabs;
@@ -31,7 +33,7 @@ const UsersPage: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/admin/users", {
+      const res = await fetch("${API_BASE_URL}/api/admin/users", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -87,8 +89,8 @@ const UsersPage: React.FC = () => {
       }
 
       const url = activeUser
-        ? `http://localhost:8000/api/admin/update-user/${activeUser._id}`
-        : `http://localhost:8000/api/admin/create-user`; // 🔁 Replace with actual endpoint
+        ? `${API_BASE_URL}/api/admin/update-user/${activeUser._id}`
+        : `${API_BASE_URL}/api/admin/create-user`; // 🔁 Replace with actual endpoint
 
       const method = activeUser ? "PATCH" : "POST";
 

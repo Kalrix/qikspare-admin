@@ -63,10 +63,41 @@ const UsersPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
       const payload = {
         full_name: values.full_name,
         phone: values.phone,
         role: values.role,
+        email: "",
+        password_hash: null,
+        business_name: "",
+        garage_name: "",
+        business_type: "",
+        garage_size: "",
+        distributor_size: "",
+        brands_served: [],
+        vehicle_types: [],
+        brands_carried: [],
+        category_focus: [],
+        pan_number: "",
+        gstin: "",
+        kyc_status: "",
+        documents: [],
+        warehouse_assigned: "",
+        vehicle_type: "",
+        vehicle_number: "",
+        location: {
+          addressLine: "",
+          city: "",
+          state: "",
+          pincode: "",
+          lat: null,
+          lng: null,
+        },
+        referral_code: "",
+        referred_by: "",
+        referral_count: 0,
+        referral_users: [],
       };
 
       const url = activeUser

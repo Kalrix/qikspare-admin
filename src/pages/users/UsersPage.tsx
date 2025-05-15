@@ -63,11 +63,12 @@ const UsersPage: React.FC = () => {
     try {
       const values = await form.validateFields();
 
+      // 👇 Inject only required + dummy fields to satisfy backend
       const payload = {
         full_name: values.full_name,
         phone: values.phone,
         role: values.role,
-        email: values.email || "",
+        email: "",
         business_name: "",
         garage_name: "",
         business_type: "",
@@ -75,6 +76,7 @@ const UsersPage: React.FC = () => {
         distributor_size: "",
         pan_number: "",
         gstin: "",
+        referral_code: "",
         brands_served: [],
         vehicle_types: [],
         brands_carried: [],

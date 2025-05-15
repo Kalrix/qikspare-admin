@@ -16,9 +16,10 @@ import { API_BASE_URL } from "../../config";
 const { Content, Sider } = Layout;
 const { Title } = Typography;
 const paymentModes = ["UPI", "Cash", "Card", "NetBanking", "Wallet"];
+
 const partCategories = [
   "Brake", "Engine", "Suspension", "Filter", "Battery", "Tyre",
-  "Oil", "Lights", "Exhaust", "AC", "Electrical", "Body"
+  "Oil", "Lights", "Exhaust", "AC", "Electrical","Mechanical", "Body"
 ];
 
 

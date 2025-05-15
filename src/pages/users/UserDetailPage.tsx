@@ -63,33 +63,35 @@ const UserDetailPage: React.FC = () => {
     try {
       const values = await form.validateFields();
 
-      const locationPayload = {
-        addressLine: values.location?.addressLine || "",
-        city: values.location?.city || "",
-        state: values.location?.state || "",
-        pincode: values.location?.pincode || "",
-        lat: values.location?.lat ? parseFloat(values.location.lat) : undefined,
-        lng: values.location?.lng ? parseFloat(values.location.lng) : undefined,
-      };
+      // Clean location fields
+      const rawLoc = values.location || {};
+      const location: Record<string, any> = {};
+      ["addressLine", "city", "state", "pincode"].forEach((key) => {
+        if (rawLoc[key]) location[key] = rawLoc[key];
+      });
+      if (rawLoc.lat) location.lat = parseFloat(rawLoc.lat);
+      if (rawLoc.lng) location.lng = parseFloat(rawLoc.lng);
 
-      const payload = {
+      // Prepare payload with only non-empty fields
+      const payload: Record<string, any> = {
         full_name: values.full_name,
-        email: values.email || "",
+        email: values.email,
         phone: values.phone,
         role: values.role,
-        business_name: values.business_name || "",
-        garage_name: values.garage_name || "",
-        business_type: values.business_type || "",
-        garage_size: values.garage_size || "",
-        distributor_size: values.distributor_size || "",
-        pan_number: values.pan_number || "",
-        gstin: values.gstin || "",
-        brands_served: [],
-        vehicle_types: [],
-        brands_carried: [],
-        category_focus: [],
-        location: locationPayload,
+        business_name: values.business_name,
+        garage_name: values.garage_name,
+        business_type: values.business_type,
+        garage_size: values.garage_size,
+        distributor_size: values.distributor_size,
+        pan_number: values.pan_number,
+        gstin: values.gstin,
+        location,
       };
+
+      // Remove empty or undefined keys
+      Object.keys(payload).forEach(
+        (key) => (payload[key] === "" || payload[key] === undefined) && delete payload[key]
+      );
 
       const res = await fetch(`${API_BASE_URL}/api/admin/update-user/${id}`, {
         method: "PATCH",

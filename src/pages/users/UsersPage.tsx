@@ -28,35 +28,24 @@ const UsersPage: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  // ✅ Step 1: Fetch all users
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        message.error("No token found. Please login again.");
-        setLoading(false);
-        return;
-      }
-
       const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
 
       const data = await res.json();
-
       if (res.ok) {
         console.log("✅ Users fetched:", data.users);
         setUsers(data.users || []);
       } else {
-        console.error("❌ Failed to fetch users:", data);
         message.error(data.detail || "Failed to fetch users");
       }
     } catch (err) {
-      console.error("❌ Network error:", err);
       message.error("Network error");
     } finally {
       setLoading(false);
@@ -64,7 +53,6 @@ const UsersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log("📦 Stored token:", localStorage.getItem("token"));
     fetchUsers();
   }, []);
 
@@ -73,11 +61,73 @@ const UsersPage: React.FC = () => {
     setIsModalVisible(true);
   };
 
+  const handleCreate = async () => {
+    try {
+      const values = await form.validateFields();
+      const payload = {
+        full_name: values.full_name,
+        phone: values.phone,
+        role: values.role,
+        email: "test@qikspare.com",
+        password_hash: "1234",
+        garage_name: "",
+        business_name: "",
+        business_type: "",
+        garage_size: "",
+        distributor_size: "",
+        brands_served: [],
+        vehicle_types: [],
+        brands_carried: [],
+        category_focus: [],
+        pan_number: "",
+        gstin: "",
+        kyc_status: "",
+        documents: [],
+        warehouse_assigned: "",
+        vehicle_type: "",
+        vehicle_number: "",
+        location: {
+          addressLine: "",
+          city: "",
+          state: "",
+          pincode: "",
+          lat: 0.0,
+          lng: 0.0,
+        },
+        referral_code: "ADMIN01",
+        referred_by: "",
+        referral_count: 0,
+        referral_users: [],
+      };
+
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE_URL}/api/admin/create-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        message.success("User created successfully");
+        setIsModalVisible(false);
+        fetchUsers();
+      } else {
+        message.error(data.detail || "Failed to create user");
+      }
+    } catch (err) {
+      message.error("Please fill in all required fields");
+    }
+  };
+
   const columns = [
     { title: "Name", dataIndex: "full_name", key: "name" },
     { title: "Phone", dataIndex: "phone", key: "phone" },
     { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Business", dataIndex: "business_name", key: "business" },
     {
       title: "City",
       key: "city",
@@ -94,7 +144,7 @@ const UsersPage: React.FC = () => {
           vendor: "green",
           delivery: "purple",
         };
-        return <Tag color={colorMap[role] || "default"}>{role?.toUpperCase()}</Tag>;
+        return <Tag color={colorMap[role] || "default"}>{role.toUpperCase()}</Tag>;
       },
     },
     {
@@ -102,10 +152,7 @@ const UsersPage: React.FC = () => {
       key: "actions",
       render: (_: any, record: any) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => navigate(`/users/${record._id}`)}
-          />
+          <Button icon={<EyeOutlined />} onClick={() => navigate(`/users/${record._id}`)} />
         </Space>
       ),
     },
@@ -159,11 +206,9 @@ const UsersPage: React.FC = () => {
       <Modal
         title="Create User"
         open={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          form.resetFields();
-        }}
-        footer={null}
+        onCancel={() => setIsModalVisible(false)}
+        onOk={handleCreate}
+        okText="Create"
       >
         <Form layout="vertical" form={form}>
           <Form.Item
@@ -177,8 +222,8 @@ const UsersPage: React.FC = () => {
             name="phone"
             label="Phone"
             rules={[
-              { required: true, message: "Phone number is required" },
-              { pattern: /^\d{10}$/, message: "Enter a valid 10-digit number" },
+              { required: true, message: "Phone is required" },
+              { pattern: /^\d{10}$/, message: "Enter valid 10-digit number" },
             ]}
           >
             <Input />

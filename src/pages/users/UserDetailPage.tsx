@@ -145,25 +145,26 @@ const UserDetailPage: React.FC = () => {
                   <Form layout="vertical" form={form} disabled={!editMode}>
                     <Row gutter={16}>
                       {[
-                        ["full_name", "Full Name"],
-                        ["email", "Email"],
-                        ["phone", "Phone", true],
-                        ["role", "Role", true],
-                        ["business_name", "Business Name"],
-                        ["garage_name", "Garage Name"],
-                        ["business_type", "Business Type"],
-                        ["garage_size", "Garage Size"],
-                        ["distributor_size", "Distributor Size"],
-                        ["gstin", "GSTIN"],
-                        ["pan_number", "PAN Number"],
-                        ["kyc_status", "KYC Status"],
-                      ].map(([key, label, isDisabled]) => (
-                        <Col span={12} key={key}>
-                          <Form.Item name={key} label={label as string}>
-                            <Input disabled={!!isDisabled} />
-                          </Form.Item>
-                        </Col>
-                      ))}
+  { key: "full_name", label: "Full Name" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone", disabled: true },
+  { key: "role", label: "Role", disabled: true },
+  { key: "business_name", label: "Business Name" },
+  { key: "garage_name", label: "Garage Name" },
+  { key: "business_type", label: "Business Type" },
+  { key: "garage_size", label: "Garage Size" },
+  { key: "distributor_size", label: "Distributor Size" },
+  { key: "gstin", label: "GSTIN" },
+  { key: "pan_number", label: "PAN Number" },
+  { key: "kyc_status", label: "KYC Status" },
+].map(({ key, label, disabled }) => (
+  <Col span={12} key={key}>
+    <Form.Item name={key} label={label}>
+      <Input disabled={!!disabled} />
+    </Form.Item>
+  </Col>
+))}
+
                     </Row>
 
                     <Divider />

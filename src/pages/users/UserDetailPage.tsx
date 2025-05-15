@@ -44,8 +44,8 @@ const UserDetailPage: React.FC = () => {
           city: loc.city || "",
           state: loc.state || "",
           pincode: loc.pincode || "",
-          lat: loc.lat || "",
-          lng: loc.lng || "",
+          lat: loc.lat?.toString() || "",
+          lng: loc.lng?.toString() || "",
         },
       });
     } catch (err: any) {
@@ -68,8 +68,8 @@ const UserDetailPage: React.FC = () => {
         city: values.location?.city || "",
         state: values.location?.state || "",
         pincode: values.location?.pincode || "",
-        lat: values.location?.lat ? parseFloat(values.location.lat) : null,
-        lng: values.location?.lng ? parseFloat(values.location.lng) : null,
+        lat: values.location?.lat ? parseFloat(values.location.lat) : undefined,
+        lng: values.location?.lng ? parseFloat(values.location.lng) : undefined,
       };
 
       const payload = {
@@ -113,6 +113,20 @@ const UserDetailPage: React.FC = () => {
     }
   };
 
+  const userFields = [
+    ["full_name", "Full Name"],
+    ["email", "Email"],
+    ["phone", "Phone", true],
+    ["business_name", "Business Name"],
+    ["garage_name", "Garage Name"],
+    ["business_type", "Business Type"],
+    ["garage_size", "Garage Size"],
+    ["distributor_size", "Distributor Size"],
+    ["gstin", "GSTIN"],
+    ["pan_number", "PAN Number"],
+    ["role", "Role", true],
+  ] as const;
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Topbar />
@@ -146,22 +160,10 @@ const UserDetailPage: React.FC = () => {
                 >
                   <Form layout="vertical" form={form} disabled={!editMode}>
                     <Row gutter={16}>
-                      {[
-                        ["full_name", "Full Name"],
-                        ["email", "Email"],
-                        ["phone", "Phone", true],
-                        ["business_name", "Business Name"],
-                        ["garage_name", "Garage Name"],
-                        ["business_type", "Business Type"],
-                        ["garage_size", "Garage Size"],
-                        ["distributor_size", "Distributor Size"],
-                        ["gstin", "GSTIN"],
-                        ["pan_number", "PAN Number"],
-                        ["role", "Role", true],
-                      ].map(([key, label, isDisabled]) => (
-                        <Col span={12} key={key}>
-                          <Form.Item name={key} label={label as string}>
-                            <Input disabled={isDisabled as boolean} />
+                      {userFields.map(([key, label, isDisabled]) => (
+                        <Col span={12} key={String(key)}>
+                          <Form.Item name={key} label={label}>
+                            <Input disabled={!!isDisabled} />
                           </Form.Item>
                         </Col>
                       ))}

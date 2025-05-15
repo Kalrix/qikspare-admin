@@ -44,6 +44,8 @@ const UserDetailPage: React.FC = () => {
           city: loc.city || "",
           state: loc.state || "",
           pincode: loc.pincode || "",
+          lat: loc.lat || "",
+          lng: loc.lng || "",
         },
       });
     } catch (err: any) {
@@ -61,6 +63,15 @@ const UserDetailPage: React.FC = () => {
     try {
       const values = await form.validateFields();
 
+      const locationPayload = {
+        addressLine: values.location?.addressLine || "",
+        city: values.location?.city || "",
+        state: values.location?.state || "",
+        pincode: values.location?.pincode || "",
+        lat: values.location?.lat ? parseFloat(values.location.lat) : null,
+        lng: values.location?.lng ? parseFloat(values.location.lng) : null,
+      };
+
       const payload = {
         full_name: values.full_name,
         email: values.email || "",
@@ -77,12 +88,7 @@ const UserDetailPage: React.FC = () => {
         vehicle_types: [],
         brands_carried: [],
         category_focus: [],
-        location: {
-          addressLine: values.location?.addressLine || "",
-          city: values.location?.city || "",
-          state: values.location?.state || "",
-          pincode: values.location?.pincode || "",
-        },
+        location: locationPayload,
       };
 
       const res = await fetch(`${API_BASE_URL}/api/admin/update-user/${id}`, {
@@ -180,6 +186,16 @@ const UserDetailPage: React.FC = () => {
                       </Col>
                       <Col span={12}>
                         <Form.Item name={["location", "pincode"]} label="Pincode">
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item name={["location", "lat"]} label="Latitude">
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item name={["location", "lng"]} label="Longitude">
                           <Input />
                         </Form.Item>
                       </Col>

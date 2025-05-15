@@ -34,8 +34,18 @@ const UserDetailPage: React.FC = () => {
       const data = await res.json();
       const found = data.users.find((u: any) => u._id === id);
       if (!found) throw new Error("User not found");
+
       setUser(found);
-      form.setFieldsValue(found);
+      const loc = found.location || {};
+      form.setFieldsValue({
+        ...found,
+        location: {
+          addressLine: loc.addressLine || "",
+          city: loc.city || "",
+          state: loc.state || "",
+          pincode: loc.pincode || "",
+        },
+      });
     } catch (err: any) {
       message.error(err.message || "Failed to load user");
     } finally {
@@ -51,10 +61,11 @@ const UserDetailPage: React.FC = () => {
     try {
       const values = await form.validateFields();
 
-      const payload: any = {
-        full_name: values.full_name || "",
+      const payload = {
+        full_name: values.full_name,
         email: values.email || "",
-        phone: values.phone || "",
+        phone: values.phone,
+        role: values.role,
         business_name: values.business_name || "",
         garage_name: values.garage_name || "",
         business_type: values.business_type || "",
@@ -62,7 +73,6 @@ const UserDetailPage: React.FC = () => {
         distributor_size: values.distributor_size || "",
         pan_number: values.pan_number || "",
         gstin: values.gstin || "",
-        role: values.role || "",
         brands_served: [],
         vehicle_types: [],
         brands_carried: [],
@@ -142,17 +152,16 @@ const UserDetailPage: React.FC = () => {
                         ["gstin", "GSTIN"],
                         ["pan_number", "PAN Number"],
                         ["role", "Role", true],
-                      ].map(([key, label, disabled]) => (
-                        <Col span={12} key={key as string}>
-                          <Form.Item name={key as string} label={label as string}>
-                            <Input disabled={!!disabled} />
+                      ].map(([key, label, isDisabled]) => (
+                        <Col span={12} key={key}>
+                          <Form.Item name={key} label={label as string}>
+                            <Input disabled={isDisabled as boolean} />
                           </Form.Item>
                         </Col>
                       ))}
                     </Row>
 
                     <Divider />
-
                     <Row gutter={16}>
                       <Col span={12}>
                         <Form.Item name={["location", "addressLine"]} label="Address Line">
@@ -182,24 +191,12 @@ const UserDetailPage: React.FC = () => {
               <Col span={8}>
                 <Card title="Referral & Metadata">
                   <Descriptions column={1}>
-                    <Descriptions.Item label="Referral Code">
-                      {user?.referral_code || "N/A"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Referred By">
-                      {user?.referred_by || "N/A"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Referral Count">
-                      {user?.referral_count ?? 0}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="KYC Status">
-                      {user?.kyc_status || "N/A"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Created At">
-                      {user?.created_at ? new Date(user.created_at).toLocaleString() : "N/A"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Updated At">
-                      {user?.updated_at ? new Date(user.updated_at).toLocaleString() : "N/A"}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Referral Code">{user?.referral_code || "N/A"}</Descriptions.Item>
+                    <Descriptions.Item label="Referred By">{user?.referred_by || "N/A"}</Descriptions.Item>
+                    <Descriptions.Item label="Referral Count">{user?.referral_count ?? 0}</Descriptions.Item>
+                    <Descriptions.Item label="KYC Status">{user?.kyc_status || "N/A"}</Descriptions.Item>
+                    <Descriptions.Item label="Created At">{user?.created_at ? new Date(user.created_at).toLocaleString() : "N/A"}</Descriptions.Item>
+                    <Descriptions.Item label="Updated At">{user?.updated_at ? new Date(user.updated_at).toLocaleString() : "N/A"}</Descriptions.Item>
                   </Descriptions>
                 </Card>
               </Col>

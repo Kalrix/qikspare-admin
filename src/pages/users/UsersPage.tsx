@@ -10,6 +10,7 @@ import {
   Form,
   Input,
   Space,
+  Select,
 } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import Topbar from "../dashboard/components/Topbar";
@@ -62,31 +63,10 @@ const UsersPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-
-      // 👇 Inject only required + dummy fields to satisfy backend
       const payload = {
         full_name: values.full_name,
         phone: values.phone,
         role: values.role,
-        email: "",
-        business_name: "",
-        garage_name: "",
-        business_type: "",
-        garage_size: "",
-        distributor_size: "",
-        pan_number: "",
-        gstin: "",
-        referral_code: "",
-        brands_served: [],
-        vehicle_types: [],
-        brands_carried: [],
-        category_focus: [],
-        location: {
-          city: "",
-          addressLine: "",
-          state: "",
-          pincode: "",
-        },
       };
 
       const url = activeUser
@@ -116,7 +96,7 @@ const UsersPage: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      message.error("Please fill form correctly");
+      message.error("Please fill the form correctly");
     }
   };
 
@@ -139,6 +119,7 @@ const UsersPage: React.FC = () => {
           admin: "red",
           garage: "blue",
           vendor: "green",
+          delivery: "purple",
         };
         return <Tag color={colorMap[role] || "default"}>{role?.toUpperCase()}</Tag>;
       },
@@ -193,6 +174,9 @@ const UsersPage: React.FC = () => {
                 <TabPane tab="Vendors" key="vendor">
                   {renderTab("vendor")}
                 </TabPane>
+                <TabPane tab="Delivery Boys" key="delivery">
+                  {renderTab("delivery")}
+                </TabPane>
               </Tabs>
             </div>
           </Content>
@@ -202,7 +186,10 @@ const UsersPage: React.FC = () => {
       <Modal
         title={activeUser ? "Edit User" : "Create User"}
         open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => {
+          setIsModalVisible(false);
+          form.resetFields();
+        }}
         onOk={handleSubmit}
         okText={activeUser ? "Update" : "Create"}
       >
@@ -217,7 +204,10 @@ const UsersPage: React.FC = () => {
           <Form.Item
             name="phone"
             label="Phone"
-            rules={[{ required: true, message: "Phone number is required" }]}
+            rules={[
+              { required: true, message: "Phone number is required" },
+              { pattern: /^\d{10}$/, message: "Enter a valid 10-digit number" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -226,7 +216,12 @@ const UsersPage: React.FC = () => {
             label="Role"
             rules={[{ required: true, message: "Role is required" }]}
           >
-            <Input placeholder="admin | garage | vendor" />
+            <Select placeholder="Select role">
+              <Select.Option value="admin">Admin</Select.Option>
+              <Select.Option value="garage">Garage</Select.Option>
+              <Select.Option value="vendor">Vendor</Select.Option>
+              <Select.Option value="delivery">Delivery</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
